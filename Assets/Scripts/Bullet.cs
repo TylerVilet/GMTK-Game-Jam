@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    public float damage = 10f;
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        
+        if (collision.CompareTag("Enemy")) {
+            // get script of gameobject
+            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+            if (enemy != null) {
+                enemyHealth.TakeDamage(damage);
+            }
+            Destroy(gameObject); // destroy the bullet on hit
+        }
     }
 }
