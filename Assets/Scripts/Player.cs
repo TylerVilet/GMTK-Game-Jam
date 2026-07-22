@@ -6,6 +6,8 @@ public class Movement : MonoBehaviour
     
     public Rigidbody2D rb;
     public float speed = 5f;
+    public float health = 100f;
+
 
     void Start()
     {
