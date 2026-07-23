@@ -4,9 +4,9 @@ public class Bullet : MonoBehaviour
 {
 
     public float damage = 10f;
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.CompareTag("Enemy")) {
+        if (collision.gameObject.CompareTag("Enemy")) {
             Debug.Log("Hit enemy");
 
             // get script of gameobject

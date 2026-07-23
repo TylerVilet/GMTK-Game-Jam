@@ -4,15 +4,15 @@ using UnityEngine;
 // says the game has begun (i.e. the Start button was pressed on the UI scene).
 public class PlayerGate : MonoBehaviour
 {
-    Movement movement;
+    Player playerMovement;
     Gun gun;
 
     void Awake()
     {
-        movement = GetComponent<Movement>();
+        playerMovement = GetComponent<Player>();
         gun = GetComponentInChildren<Gun>();
 
-        if (movement != null) movement.enabled = false;
+        if (playerMovement != null) playerMovement.enabled = false;
         if (gun != null) gun.enabled = false;
     }
 
@@ -30,7 +30,7 @@ public class PlayerGate : MonoBehaviour
 
     void EnablePlayer()
     {
-        if (movement != null) movement.enabled = true;
+        if (playerMovement != null) playerMovement.enabled = true;
         if (gun != null) gun.enabled = true;
     }
 }

@@ -94,9 +94,10 @@ public class WaveManager : MonoBehaviour
             if (IsGameOver) yield break;
 
             Debug.Log($"[WaveManager] Wave {CurrentWaveIndex} cleared.");
-            OnWaveCleared?.Invoke();
 
             IsWaitingForNextWave = true;
+            OnWaveCleared?.Invoke();
+
             yield return new WaitUntil(() => !IsWaitingForNextWave || IsGameOver);
 
             if (IsGameOver) yield break;
@@ -105,6 +106,7 @@ public class WaveManager : MonoBehaviour
 
     IEnumerator RunWave()
     {
+        Debug.Log("Wave Started");
         int enemyCount = startingEnemyCount + CurrentWaveIndex * enemyCountIncreasePerWave;
         BuildEligiblePrefabs();
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Movement : MonoBehaviour
+public class Player : MonoBehaviour
 {
     
     public Rigidbody2D rb;
@@ -12,11 +12,18 @@ public class Movement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.freezeRotation = true;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
+        // dead
+        if (health <= 0)
+        {
+            WaveManager.Instance.GameOver();
+        }
+
         moveForward();
         moveRight();
         moveLeft();
@@ -50,5 +57,11 @@ public class Movement : MonoBehaviour
         {
             transform.position += transform.right * speed * Time.deltaTime;
         }
+    }
+
+    public void loseHealth(float damage)
+    {
+        health -= damage;
+        Debug.Log("Player health: " + health);
     }
 }
