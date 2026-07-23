@@ -11,7 +11,10 @@ public class PowerUpUI : MonoBehaviour
         MaxHealth,
         FireRate,
         Damage,
-        BulletRange
+        BulletRange,
+        DashDistance,
+        DashSpeed,
+        FullHealth
     }
 
     [System.Serializable]
@@ -32,6 +35,9 @@ public class PowerUpUI : MonoBehaviour
         new PowerUpOption { title = "Rapid Fire", description = "+25% fire rate", type = PowerUpType.FireRate, amount = 0.25f },
         new PowerUpOption { title = "Heavy Rounds", description = "+30% bullet damage", type = PowerUpType.Damage, amount = 0.3f },
         new PowerUpOption { title = "Long Barrel", description = "+50% bullet range", type = PowerUpType.BulletRange, amount = 0.5f },
+        new PowerUpOption { title = "Lengthy Dash", description = "+20% distance for dash", type = PowerUpType.DashDistance, amount = 0.2f },
+        new PowerUpOption { title = "Quick Dash", description = "+20% speed for dash", type = PowerUpType.DashSpeed, amount = 0.2f },
+        new PowerUpOption { title = "Heal Wounds", description = "restore player health to max", type = PowerUpType.FullHealth, amount = 1f },
     };
     public Button[] choiceButtons;
     public TMP_Text[] choiceLabels;
@@ -76,7 +82,7 @@ public class PowerUpUI : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        panel.SetActive(false);
+        // panel.SetActive(false);
         SubscribeToWaveManager();
     }
 
@@ -229,6 +235,15 @@ public class PowerUpUI : MonoBehaviour
                 break;
             case PowerUpType.BulletRange:
                 if (gun != null) gun.rangeMultiplier *= 1f + option.amount;
+                break;
+            case PowerUpType.DashDistance:
+                if (player != null) player.dashDistance *= 1f + option.amount;
+                break;
+            case PowerUpType.DashSpeed:
+                if (player != null) player.dashSpeed *= 1f + option.amount;
+                break;
+            case PowerUpType.FullHealth:
+                if (player != null) player.health = player.maxHealth;
                 break;
         }
 

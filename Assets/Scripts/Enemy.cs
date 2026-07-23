@@ -37,9 +37,18 @@ public class Enemy : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        TryDealDamage(collision);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        TryDealDamage(collision);
+    }
+
+    private void TryDealDamage(Collision2D collision)
+    {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Collided with Player");
             Player player = collision.gameObject.GetComponent<Player>();
             if (player != null && Time.time >= damageCooldown + lastHitTime)
             {

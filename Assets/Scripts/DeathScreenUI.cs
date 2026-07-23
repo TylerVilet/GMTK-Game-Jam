@@ -20,6 +20,7 @@ public class DeathScreenUI : MonoBehaviour
 
     void Awake()
     {
+        BuildUI();
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -33,8 +34,8 @@ public class DeathScreenUI : MonoBehaviour
 
     void Start()
     {
-        BuildUI();
-        panel.SetActive(false);
+        
+        // panel.SetActive(false);
         restartButton.onClick.AddListener(Restart);
         SubscribeToWaveManager();
     }
