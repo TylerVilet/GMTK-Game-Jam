@@ -19,29 +19,7 @@ public class PlayerWorldHealthBar : MonoBehaviour
         root.AddComponent<PlayerWorldHealthBar>();
     }
 
-<<<<<<< HEAD
-    void Start()
-    {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        player = playerObject != null ? playerObject.GetComponent<Player>() : null;
-        if (player == null)
-        {
-            player = FindAnyObjectByType<Player>();
-        }
-
-        if (player == null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        BuildBar();
-    }
-
-    void BuildBar()
-=======
     void Awake()
->>>>>>> aadd3a4ce117c0ac955bb7a83581bb8a5eaf234e
     {
         Texture2D texture = new Texture2D(1, 1);
         texture.SetPixel(0, 0, Color.white);

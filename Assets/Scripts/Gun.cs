@@ -10,6 +10,11 @@ public class Gun : MonoBehaviour
     [SerializeField] private Transform player; // drag your player object in here
     [SerializeField] private float orbitRadius = 1f; // how far the gun sits from the player
 
+    // Applied to each spawned bullet - power-ups multiply these instead of
+    // touching the bullet prefab's own base values.
+    public float damageMultiplier = 1f;
+    public float rangeMultiplier = 1f;
+
     private float fireTimer = 0f;
     private Camera mainCamera;
 
@@ -53,6 +58,20 @@ public class Gun : MonoBehaviour
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D projRb = projectile.GetComponent<Rigidbody2D>();
         projRb.linearVelocity = firePoint.up * projectileSpeed;
+
+        Bullet bulletScript = projectile.GetComponent<Bullet>();
+        if (bulletScript != null)
+        {
+            bulletScript.damage *= damageMultiplier;
+            bulletScript.maxRange *= rangeMultiplier;
+        }
+    }
+
+    // percent as a fraction, e.g. 0.25 for +25% fire rate (shoots more often,
+    // so this shortens the cooldown rather than lengthening it).
+    public void IncreaseFireRate(float percent)
+    {
+        fireRate /= 1f + percent;
     }
 
     public void EnableGun()

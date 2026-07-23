@@ -5,23 +5,33 @@ using TMPro;
 
 public class PowerUpUI : MonoBehaviour
 {
+    public enum PowerUpType
+    {
+        MoveSpeed,
+        MaxHealth,
+        FireRate,
+        Damage,
+        BulletRange
+    }
+
     [System.Serializable]
     public class PowerUpOption
     {
         public string title;
         [TextArea] public string description;
-        // TODO: once player stats exist, add whatever's needed to actually apply this
-        // (e.g. a stat enum + amount) instead of just logging the pick.
+        public PowerUpType type;
+        // Fraction (0.2 = +20%) for the multiplicative stats, flat amount for MaxHealth.
+        public float amount;
     }
 
     public GameObject panel;
     public PowerUpOption[] powerUpPool = new PowerUpOption[]
     {
-        new PowerUpOption { title = "Adrenaline Rush", description = "+20% move speed" },
-        new PowerUpOption { title = "Reinforced Suit", description = "+10 max HP" },
-        new PowerUpOption { title = "Rapid Fire", description = "+25% fire rate" },
-        new PowerUpOption { title = "Heavy Rounds", description = "+30% bullet damage" },
-        new PowerUpOption { title = "Long Barrel", description = "+50% bullet range" },
+        new PowerUpOption { title = "Adrenaline Rush", description = "+20% move speed", type = PowerUpType.MoveSpeed, amount = 0.2f },
+        new PowerUpOption { title = "Reinforced Suit", description = "+10 max HP", type = PowerUpType.MaxHealth, amount = 10f },
+        new PowerUpOption { title = "Rapid Fire", description = "+25% fire rate", type = PowerUpType.FireRate, amount = 0.25f },
+        new PowerUpOption { title = "Heavy Rounds", description = "+30% bullet damage", type = PowerUpType.Damage, amount = 0.3f },
+        new PowerUpOption { title = "Long Barrel", description = "+50% bullet range", type = PowerUpType.BulletRange, amount = 0.5f },
     };
     public Button[] choiceButtons;
     public TMP_Text[] choiceLabels;
@@ -185,11 +195,43 @@ public class PowerUpUI : MonoBehaviour
     void PickChoice(int index)
     {
         PowerUpOption chosen = currentChoices[index];
-        Debug.Log($"[PowerUpUI] Picked: {chosen.title} (effect not wired up yet)");
+        ApplyPowerUp(chosen);
 
         panel.SetActive(false);
 
         if (WaveManager.Instance != null)
             WaveManager.Instance.StartNextWave();
+    }
+
+    void ApplyPowerUp(PowerUpOption option)
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        Player player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
+        Gun gun = FindFirstObjectByType<Gun>();
+
+        switch (option.type)
+        {
+            case PowerUpType.MoveSpeed:
+                if (player != null) player.speed *= 1f + option.amount;
+                break;
+            case PowerUpType.MaxHealth:
+                if (player != null)
+                {
+                    player.maxHealth += option.amount;
+                    player.health += option.amount;
+                }
+                break;
+            case PowerUpType.FireRate:
+                if (gun != null) gun.IncreaseFireRate(option.amount);
+                break;
+            case PowerUpType.Damage:
+                if (gun != null) gun.damageMultiplier *= 1f + option.amount;
+                break;
+            case PowerUpType.BulletRange:
+                if (gun != null) gun.rangeMultiplier *= 1f + option.amount;
+                break;
+        }
+
+        Debug.Log($"[PowerUpUI] Applied: {option.title}");
     }
 }

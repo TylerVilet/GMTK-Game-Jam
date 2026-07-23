@@ -31,7 +31,6 @@ public class PlayerHUD : MonoBehaviour
 
     void Start()
     {
-<<<<<<< HEAD
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         player = playerObject != null ? playerObject.GetComponent<Player>() : null;
         if (player == null)
@@ -45,8 +44,6 @@ public class PlayerHUD : MonoBehaviour
             return;
         }
 
-=======
->>>>>>> aadd3a4ce117c0ac955bb7a83581bb8a5eaf234e
         BuildUI();
         FindPlayer();
     }

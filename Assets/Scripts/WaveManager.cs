@@ -29,6 +29,7 @@ public class WaveManager : MonoBehaviour
     public int enemyCountIncreasePerWave = 10;
     public string enemyTag = "Enemy";
     public float spawnInterval = 5f;
+    public float stopwatch;
 
     [Header("UI Scene (loaded additively alongside this one)")]
     public string uiSceneName = "MainMenu";
@@ -112,6 +113,7 @@ public class WaveManager : MonoBehaviour
 
     IEnumerator RunWave()
     {
+
         int enemyCount = startingEnemyCount + CurrentWaveIndex * enemyCountIncreasePerWave;
         BuildEligiblePrefabs();
 
