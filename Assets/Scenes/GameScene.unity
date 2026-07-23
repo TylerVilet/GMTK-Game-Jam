@@ -164,6 +164,10 @@ MonoBehaviour:
   enemyCountIncreasePerWave: 5
   enemyTag: Enemy
   spawnInterval: 5
+  uiSceneName: MainMenu
+  OnGameBegin:
+    m_PersistentCalls:
+      m_Calls: []
   OnWaveStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -847,6 +851,7 @@ GameObject:
   - component: {fileID: 2063981081}
   - component: {fileID: 2063981082}
   - component: {fileID: 2063981083}
+  - component: {fileID: 2063981090}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -972,7 +977,19 @@ MonoBehaviour:
   rb: {fileID: 2063981081}
   speed: 5
   health: 100
---- !u!61 &2063981083
+--- !u!114 &2063981083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2063981077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 198222d321ce96b42baec047dcf806bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerGate
+--- !u!61 &2063981090
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
