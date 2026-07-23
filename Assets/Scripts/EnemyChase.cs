@@ -12,7 +12,7 @@ public class EnemyChase : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
             player = playerObject.transform;

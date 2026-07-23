@@ -7,12 +7,20 @@ public class Bullet : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Enemy")) {
+            Debug.Log("Hit enemy");
+
             // get script of gameobject
             Enemy enemy = collision.gameObject.GetComponent<Enemy>();
             if (enemy != null) {
-                enemyHealth.TakeDamage(damage);
+                enemy.TakeDamage(damage);
             }
             Destroy(gameObject); // destroy the bullet on hit
         }
     }
+
+    private void OnBecameInvisible()
+    {
+        Destroy(gameObject);
+    }
+
 }

@@ -27,6 +27,7 @@ public class WaveManager : MonoBehaviour
     public int startingEnemyCount = 50;
     public int enemyCountIncreasePerWave = 10;
     public string enemyTag = "Enemy";
+    public float spawnInterval = 5f;
 
     [Header("Events (hook UI / other systems to these)")]
     public IntEvent OnWaveStarted;           // wave index
@@ -107,7 +108,7 @@ public class WaveManager : MonoBehaviour
         for (int i = 0; i < enemyCount; i++)
         {
             SpawnEnemy();
-            yield return null; // spread spawns across a few frames instead of all at once
+            yield return new WaitForSeconds(spawnInterval / enemyCount); // spread spawns across a few frames instead of all at once
         }
 
         while (EnemiesRemaining > 0 && !IsGameOver)
