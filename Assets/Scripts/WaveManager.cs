@@ -95,7 +95,6 @@ public class WaveManager : MonoBehaviour
 
     IEnumerator RunWave()
     {
-        Debug.Log("Wave Started");
         int enemyCount = startingEnemyCount + CurrentWaveIndex * enemyCountIncreasePerWave;
         BuildEligiblePrefabs();
 
