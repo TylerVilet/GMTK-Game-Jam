@@ -10,16 +10,8 @@ public class CameraFollow : MonoBehaviour
     private Vector3 velocity;
     private ArenaBounds arena;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void Bootstrap()
-    {
-        Camera mainCamera = Camera.main;
-        if (mainCamera != null && mainCamera.GetComponent<CameraFollow>() == null)
-        {
-            mainCamera.gameObject.AddComponent<CameraFollow>();
-        }
-    }
-
+    // Attached to Camera.main by CameraFollowBootstrap, which re-attaches this
+    // fresh every time the scene (and therefore the camera) reloads.
     void Start()
     {
         cam = GetComponent<Camera>();

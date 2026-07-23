@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerWorldHealthBar : MonoBehaviour
 {
@@ -8,25 +9,53 @@ public class PlayerWorldHealthBar : MonoBehaviour
 
     private Player player;
     private Transform fill;
+    private Sprite sprite;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        new GameObject("PlayerWorldHealthBar").AddComponent<PlayerWorldHealthBar>();
+        GameObject root = new GameObject("PlayerWorldHealthBar");
+        DontDestroyOnLoad(root);
+        root.AddComponent<PlayerWorldHealthBar>();
+    }
+
+    void Awake()
+    {
+        Texture2D texture = new Texture2D(1, 1);
+        texture.SetPixel(0, 0, Color.white);
+        texture.Apply();
+        // Pivot on the left edge so shrinking the scale keeps the left edge fixed
+        // and only moves the right edge inward, i.e. the bar drains right to left.
+        sprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0f, 0.5f), 1f);
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void Start()
     {
+        AttachToPlayer();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // The old anchor/fill were children of the old Player and were already
+        // destroyed along with it - just find the new Player and rebuild.
+        AttachToPlayer();
+    }
+
+    void AttachToPlayer()
+    {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        player = playerObject != null ? playerObject.GetComponent<Player>() : null;
-        if (player == null)
-        {
-            player = FindFirstObjectByType<Player>();
-        }
+        player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
 
         if (player == null)
         {
-            Destroy(gameObject);
+            fill = null;
             return;
         }
 
@@ -35,13 +64,6 @@ public class PlayerWorldHealthBar : MonoBehaviour
 
     void BuildBar()
     {
-        Texture2D texture = new Texture2D(1, 1);
-        texture.SetPixel(0, 0, Color.white);
-        texture.Apply();
-        // Pivot on the left edge so shrinking the scale keeps the left edge fixed
-        // and only moves the right edge inward, i.e. the bar drains right to left.
-        Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0f, 0.5f), 1f);
-
         Vector3 playerScale = player.transform.localScale;
         GameObject anchor = new GameObject("HealthBarAnchor");
         anchor.transform.SetParent(player.transform, false);

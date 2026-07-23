@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerHUD : MonoBehaviour
 {
@@ -13,25 +14,36 @@ public class PlayerHUD : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        new GameObject("PlayerHUD").AddComponent<PlayerHUD>();
+        GameObject root = new GameObject("PlayerHUD");
+        DontDestroyOnLoad(root);
+        root.AddComponent<PlayerHUD>();
+    }
+
+    void Awake()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void Start()
     {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        player = playerObject != null ? playerObject.GetComponent<Player>() : null;
-        if (player == null)
-        {
-            player = FindFirstObjectByType<Player>();
-        }
-
-        if (player == null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         BuildUI();
+        FindPlayer();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindPlayer();
+    }
+
+    void FindPlayer()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
     }
 
     void BuildUI()
