@@ -16,8 +16,14 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
+        // dead
+        if (health <= 0)
+        {
+            WaveManager.Instance.GameOver();
+        }
+
         moveForward();
         moveRight();
         moveLeft();

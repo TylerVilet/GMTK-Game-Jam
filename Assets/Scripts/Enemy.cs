@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     public float damage = 10f;
     public float damageCooldown = 0.5f;
     private float lastHitTime = -10f;
+    private bool isDead = false;
 
     private void Start()
     {
@@ -14,28 +15,31 @@ public class Enemy : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    private void FixedUpdate()
+    public void TakeDamage(float damage)
     {
-        // death
+        if (isDead) return;
+
+        health -= damage;
+        Debug.Log("Health: " + health);
+
         if (health <= 0)
         {
-            Destroy(gameObject);
-
+            Die();
         }
     }
 
-    public void TakeDamage(float damage)
+    void Die()
     {
-        health -= damage;
-        Debug.Log("Health: " + health);
+        isDead = true;
+        WaveManager.Instance.NotifyEnemyKilled();
+        Destroy(gameObject);
     }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        
         if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Collided with Player");
-
             Player player = collision.gameObject.GetComponent<Player>();
             if (player != null && Time.time >= damageCooldown + lastHitTime)
             {
