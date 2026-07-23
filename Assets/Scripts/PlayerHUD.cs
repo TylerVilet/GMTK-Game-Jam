@@ -22,7 +22,7 @@ public class PlayerHUD : MonoBehaviour
         player = playerObject != null ? playerObject.GetComponent<Player>() : null;
         if (player == null)
         {
-            player = FindFirstObjectByType<Player>();
+            player = FindAnyObjectByType<Player>();
         }
 
         if (player == null)

@@ -56,4 +56,9 @@ public class Player : MonoBehaviour
             WaveManager.Instance.GameOver();
         }
     }
+
+    public void EnableMovement()
+    {
+        enabled = true;
+    }
 }

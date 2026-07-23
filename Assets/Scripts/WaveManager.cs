@@ -33,6 +33,7 @@ public class WaveManager : MonoBehaviour
     [Header("UI Scene (loaded additively alongside this one)")]
     public string uiSceneName = "MainMenu";
 
+
     [Header("Events (hook UI / other systems to these)")]
     public UnityEvent OnGameBegin;           // Start button was pressed - unlock the player
     public IntEvent OnWaveStarted;           // wave index
@@ -67,9 +68,14 @@ public class WaveManager : MonoBehaviour
     public void BeginGame()
     {
         if (IsGameOver) return;
+
         OnGameBegin?.Invoke();
         StartCoroutine(RunWaves());
+
+        if (!string.IsNullOrEmpty(uiSceneName))
+            SceneManager.UnloadSceneAsync(uiSceneName);
     }
+
 
     void Update()
     {

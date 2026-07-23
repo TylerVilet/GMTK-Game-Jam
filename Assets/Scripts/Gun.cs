@@ -54,4 +54,9 @@ public class Gun : MonoBehaviour
         Rigidbody2D projRb = projectile.GetComponent<Rigidbody2D>();
         projRb.linearVelocity = firePoint.up * projectileSpeed;
     }
+
+    public void EnableGun()
+    {
+        enabled = true;
+    }
 }

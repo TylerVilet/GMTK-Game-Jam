@@ -1,6 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class StartScreenUI : MonoBehaviour
 {
@@ -91,7 +92,7 @@ public class StartScreenUI : MonoBehaviour
     {
         startButton.interactable = selectedCharacterIndex >= 0 && selectedWeaponIndex >= 0;
     }
-
+    
     void BeginGame()
     {
         startScreenRoot.SetActive(false);
