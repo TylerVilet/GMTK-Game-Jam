@@ -11,11 +11,15 @@ public class ArenaBounds : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        new GameObject("ArenaBounds").AddComponent<ArenaBounds>();
+        GameObject root = new GameObject("ArenaBounds");
+        DontDestroyOnLoad(root);
+        root.AddComponent<ArenaBounds>();
     }
 
     void Awake()
     {
+        // Built once and kept alive via DontDestroyOnLoad - the walls don't
+        // depend on the player/wave state, so they never need to be rebuilt.
         Texture2D texture = new Texture2D(1, 1);
         texture.SetPixel(0, 0, Color.white);
         texture.Apply();

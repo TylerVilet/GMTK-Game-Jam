@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerWorldHealthBar : MonoBehaviour
 {
@@ -8,13 +9,17 @@ public class PlayerWorldHealthBar : MonoBehaviour
 
     private Player player;
     private Transform fill;
+    private Sprite sprite;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        new GameObject("PlayerWorldHealthBar").AddComponent<PlayerWorldHealthBar>();
+        GameObject root = new GameObject("PlayerWorldHealthBar");
+        DontDestroyOnLoad(root);
+        root.AddComponent<PlayerWorldHealthBar>();
     }
 
+<<<<<<< HEAD
     void Start()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -34,14 +39,64 @@ public class PlayerWorldHealthBar : MonoBehaviour
     }
 
     void BuildBar()
+=======
+    void Awake()
+>>>>>>> aadd3a4ce117c0ac955bb7a83581bb8a5eaf234e
     {
         Texture2D texture = new Texture2D(1, 1);
         texture.SetPixel(0, 0, Color.white);
         texture.Apply();
         // Pivot on the left edge so shrinking the scale keeps the left edge fixed
         // and only moves the right edge inward, i.e. the bar drains right to left.
-        Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0f, 0.5f), 1f);
+        sprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0f, 0.5f), 1f);
 
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void Start()
+    {
+        AttachToPlayer();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // The old anchor/fill were children of the old Player and were already
+        // destroyed along with it - just find the new Player and rebuild.
+        AttachToPlayer();
+    }
+
+    void AttachToPlayer()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        Player foundPlayer = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
+
+        if (foundPlayer == null)
+        {
+            player = null;
+            fill = null;
+            return;
+        }
+
+        // sceneLoaded can fire more than once per restart (GameScene reloading,
+        // then WaveManager re-loading MainMenu additively) - only rebuild when
+        // the player instance actually changed, otherwise we'd leave a stray
+        // duplicate bar behind that never gets updated again.
+        if (foundPlayer == player && fill != null)
+        {
+            return;
+        }
+
+        player = foundPlayer;
+        BuildBar();
+    }
+
+    void BuildBar()
+    {
         Vector3 playerScale = player.transform.localScale;
         GameObject anchor = new GameObject("HealthBarAnchor");
         anchor.transform.SetParent(player.transform, false);
