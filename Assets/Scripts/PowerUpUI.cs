@@ -185,14 +185,48 @@ public class PowerUpUI : MonoBehaviour
     {
         if (powerUpPool == null || powerUpPool.Length == 0) return;
 
-        currentChoices = new PowerUpOption[choiceButtons.Length];
-        for (int i = 0; i < choiceButtons.Length; i++)
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        Player player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
+
+        bool isFullHealth = player != null && player.health >= player.maxHealth;
+
+        // Build a pool that excludes FullHealth if the player doesn't need it
+        System.Collections.Generic.List<PowerUpOption> availablePool = new System.Collections.Generic.List<PowerUpOption>();
+        foreach (var option in powerUpPool)
         {
-            PowerUpOption option = powerUpPool[Random.Range(0, powerUpPool.Length)];
+            if (option.type == PowerUpType.FullHealth && isFullHealth)
+                continue;
+            availablePool.Add(option);
+        }
+
+        if (availablePool.Count == 0) return;
+
+        int choiceCount = Mathf.Min(choiceButtons.Length, availablePool.Count);
+        currentChoices = new PowerUpOption[choiceButtons.Length];
+
+        for (int i = 0; i < choiceCount; i++)
+        {
+            int pickIndex = Random.Range(0, availablePool.Count);
+            PowerUpOption option = availablePool[pickIndex];
+            availablePool.RemoveAt(pickIndex); // no repeats within this set of choices
+
             currentChoices[i] = option;
 
             if (i < choiceLabels.Length && choiceLabels[i] != null)
                 choiceLabels[i].text = $"{option.title}\n{option.description}";
+        }
+
+        // In case availablePool ran out before filling all buttons (e.g. FullHealth
+        // excluded and pool is small), disable any leftover buttons/labels
+        for (int i = choiceCount; i < choiceButtons.Length; i++)
+        {
+            currentChoices[i] = null;
+            if (choiceButtons[i] != null) choiceButtons[i].gameObject.SetActive(false);
+            else if (i < choiceLabels.Length && choiceLabels[i] != null) choiceLabels[i].text = "";
+        }
+        for (int i = 0; i < choiceCount; i++)
+        {
+            if (choiceButtons[i] != null) choiceButtons[i].gameObject.SetActive(true);
         }
 
         panel.SetActive(true);
@@ -200,6 +234,9 @@ public class PowerUpUI : MonoBehaviour
 
     void PickChoice(int index)
     {
+        if (currentChoices == null || index >= currentChoices.Length || currentChoices[index] == null)
+            return;
+
         PowerUpOption chosen = currentChoices[index];
         ApplyPowerUp(chosen);
 
@@ -225,6 +262,7 @@ public class PowerUpUI : MonoBehaviour
                 {
                     player.maxHealth += option.amount;
                     player.health += option.amount;
+                    player.updateHealthUI();
                 }
                 break;
             case PowerUpType.FireRate:
@@ -243,7 +281,11 @@ public class PowerUpUI : MonoBehaviour
                 if (player != null) player.dashSpeed *= 1f + option.amount;
                 break;
             case PowerUpType.FullHealth:
-                if (player != null) player.health = player.maxHealth;
+                if (player != null)
+                {
+                    player.health = player.maxHealth;
+                    player.updateHealthUI();
+                }
                 break;
         }
 

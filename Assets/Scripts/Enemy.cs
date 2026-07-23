@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -8,11 +9,14 @@ public class Enemy : MonoBehaviour
     public float damageCooldown = 0.5f;
     private float lastHitTime = -10f;
     private bool isDead = false;
+    [SerializeField] private int scoreValue = 10;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
+
+        
     }
 
     public void TakeDamage(float damage)
@@ -32,6 +36,7 @@ public class Enemy : MonoBehaviour
     {
         isDead = true;
         WaveManager.Instance.NotifyEnemyKilled();
+        ScoreManager.Instance.AddScore(scoreValue);
         Destroy(gameObject);
     }
 

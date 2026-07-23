@@ -102,6 +102,11 @@ public class WaveManager : MonoBehaviour
 
             Debug.Log($"[WaveManager] Wave {CurrentWaveIndex} cleared.");
 
+            // add remaining time at end of wave to score
+            int timeBonus = Mathf.RoundToInt(Mathf.Max(0f, Countdown));
+            if (ScoreManager.Instance != null)
+                ScoreManager.Instance.AddScore(timeBonus * (1 + CurrentWaveIndex));
+
             IsWaitingForNextWave = true;
             OnWaveCleared?.Invoke();
 
@@ -151,17 +156,50 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    [Header("Spawn Safety")]
+    public float minSpawnDistanceFromPlayer = 5f;
+
     void SpawnEnemy()
     {
         if (eligiblePrefabs.Count == 0) return;
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
+        Transform point = GetSafeSpawnPoint();
+        if (point == null) return;
+
         GameObject prefab = eligiblePrefabs[Random.Range(0, eligiblePrefabs.Count)];
-        Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
         GameObject enemy = Instantiate(prefab, point.position, point.rotation);
 
         if (!enemy.CompareTag(enemyTag))
             enemy.tag = enemyTag;
+    }
+
+    Transform GetSafeSpawnPoint()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        Vector3 playerPos = playerObject != null ? playerObject.transform.position : Vector3.positiveInfinity;
+
+        // Points far enough from the player - pick randomly among ALL of these,
+        // not just the single farthest one.
+        List<Transform> safePoints = new List<Transform>();
+        foreach (var point in spawnPoints)
+        {
+            if (Vector3.Distance(point.position, playerPos) >= minSpawnDistanceFromPlayer)
+                safePoints.Add(point);
+        }
+
+        if (safePoints.Count > 0)
+            return safePoints[Random.Range(0, safePoints.Count)];
+
+        // Fallback: no point clears the safe distance (e.g. small arena, player
+        // standing centrally). Instead of always picking the single farthest
+        // point, pick randomly among the top half farthest, so spawns still vary.
+        List<Transform> sorted = new List<Transform>(spawnPoints);
+        sorted.Sort((a, b) =>
+            Vector3.Distance(b.position, playerPos).CompareTo(Vector3.Distance(a.position, playerPos)));
+
+        int topHalfCount = Mathf.Max(1, sorted.Count / 2);
+        return sorted[Random.Range(0, topHalfCount)];
     }
 
     // Enemy scripts should call this when an enemy dies.
@@ -191,6 +229,10 @@ public class WaveManager : MonoBehaviour
         IsWaitingForNextWave = false;
         StopAllCoroutines();
         Debug.Log("[WaveManager] GAME OVER.");
-        OnGameOver?.Invoke();
+        DeathScreenUI.Instance.ShowDeathScreen();
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
+            Destroy(playerObject);
     }
 }

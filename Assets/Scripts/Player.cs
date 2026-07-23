@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 public class Player : MonoBehaviour
 {
 
@@ -21,10 +22,15 @@ public class Player : MonoBehaviour
     bool dashQueued = false;
 
 
+    public TMP_Text healthText;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
+
+        healthText.text = health + "/" + maxHealth;
     }
 
     private void Update()
@@ -100,9 +106,16 @@ public class Player : MonoBehaviour
         {
             WaveManager.Instance.GameOver();
         }
+
+        healthText.text = health + "/" + maxHealth; 
     }
     public void EnableMovement()
     {
         enabled = true;
+    }
+
+    public void updateHealthUI()
+    {
+        healthText.text = health + "/" + maxHealth;
     }
 }

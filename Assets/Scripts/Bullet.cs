@@ -37,6 +37,12 @@ public class Bullet : MonoBehaviour
         {
             Destroy(gameObject); // destroy the bullet when it hits a border wall
         }
+        else if (collision.gameObject.CompareTag("EnemyBullet"))
+        {
+            // destroy player and enemy bullet if they collide
+            Destroy(gameObject);
+            Destroy(collision.gameObject);
+        }
     }
 
     private void OnBecameInvisible()
