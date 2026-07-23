@@ -51,14 +51,25 @@ public class PlayerWorldHealthBar : MonoBehaviour
     void AttachToPlayer()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
+        Player foundPlayer = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
 
-        if (player == null)
+        if (foundPlayer == null)
         {
+            player = null;
             fill = null;
             return;
         }
 
+        // sceneLoaded can fire more than once per restart (GameScene reloading,
+        // then WaveManager re-loading MainMenu additively) - only rebuild when
+        // the player instance actually changed, otherwise we'd leave a stray
+        // duplicate bar behind that never gets updated again.
+        if (foundPlayer == player && fill != null)
+        {
+            return;
+        }
+
+        player = foundPlayer;
         BuildBar();
     }
 
