@@ -6,7 +6,8 @@ public class Player : MonoBehaviour
     
     public Rigidbody2D rb;
     public float speed = 5f;
-    public float health = 100f;
+    public float maxHealth = 30f;
+    public float health = 30f;
 
 
     void Start()
@@ -15,53 +16,44 @@ public class Player : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        // dead
-        if (health <= 0)
+        health = Mathf.Clamp(health, 0f, maxHealth);
+
+        if (health <= 0f && WaveManager.Instance != null)
         {
             WaveManager.Instance.GameOver();
         }
 
-        moveForward();
-        moveRight();
-        moveLeft();
-        moveDown();
+        Vector2 direction = moveForward() + moveDown() + moveLeft() + moveRight();
+        rb.linearVelocity = direction.normalized * speed;
     }
 
-    void moveForward()
+    Vector2 moveForward()
     {
-        if (Keyboard.current.wKey.isPressed)
-        {
-            transform.position += transform.up * speed * Time.deltaTime;
-        }
+        return Keyboard.current.wKey.isPressed ? (Vector2)transform.up : Vector2.zero;
     }
-    void moveDown()
+    Vector2 moveDown()
     {
-        if (Keyboard.current.sKey.isPressed)
-        {
-            transform.position += - transform.up * speed * Time.deltaTime;
-        }
+        return Keyboard.current.sKey.isPressed ? -(Vector2)transform.up : Vector2.zero;
     }
-    void moveLeft()
+    Vector2 moveLeft()
     {
-        if (Keyboard.current.aKey.isPressed)
-        {
-            transform.position += - transform.right * speed * Time.deltaTime;
-        }
+        return Keyboard.current.aKey.isPressed ? -(Vector2)transform.right : Vector2.zero;
     }
-    void moveRight()
+    Vector2 moveRight()
     {
-        if (Keyboard.current.dKey.isPressed)
-        {
-            transform.position += transform.right * speed * Time.deltaTime;
-        }
+        return Keyboard.current.dKey.isPressed ? (Vector2)transform.right : Vector2.zero;
     }
 
     public void loseHealth(float damage)
     {
-        health -= damage;
+        health = Mathf.Clamp(health - damage, 0f, maxHealth);
         Debug.Log("Player health: " + health);
+
+        if (health <= 0f && WaveManager.Instance != null)
+        {
+            WaveManager.Instance.GameOver();
+        }
     }
 }
