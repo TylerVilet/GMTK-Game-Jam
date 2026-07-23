@@ -25,6 +25,7 @@ public class PowerUpUI : MonoBehaviour
         public PowerUpType type;
         // Fraction (0.2 = +20%) for the multiplicative stats, flat amount for MaxHealth.
         public float amount;
+        public Sprite icon;
     }
 
     public GameObject panel;
@@ -40,18 +41,12 @@ public class PowerUpUI : MonoBehaviour
         new PowerUpOption { title = "Heal Wounds", description = "restore player health to max", type = PowerUpType.FullHealth, amount = 1f },
     };
     public Button[] choiceButtons;
-    public TMP_Text[] choiceLabels;
+    public TMP_Text[] choiceTitles;
+    public TMP_Text[] choiceDescriptions;
+    public Image[] choiceImages;
 
     PowerUpOption[] currentChoices;
     private WaveManager subscribedWaveManager;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void Bootstrap()
-    {
-        GameObject root = new GameObject("PowerUpUI");
-        DontDestroyOnLoad(root);
-        root.AddComponent<PowerUpUI>();
-    }
 
     void Awake()
     {
@@ -68,7 +63,6 @@ public class PowerUpUI : MonoBehaviour
 
     void Start()
     {
-        BuildUI();
         panel.SetActive(false);
 
         for (int i = 0; i < choiceButtons.Length; i++)
@@ -95,90 +89,6 @@ public class PowerUpUI : MonoBehaviour
 
         if (subscribedWaveManager != null)
             subscribedWaveManager.OnWaveCleared.AddListener(ShowChoices);
-    }
-
-    void BuildUI()
-    {
-        GameObject canvasObject = new GameObject("PowerUpCanvas");
-        canvasObject.transform.SetParent(transform, false);
-
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 90; // above the HP HUD, below the death screen
-
-        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-
-        canvasObject.AddComponent<GraphicRaycaster>();
-
-        panel = new GameObject("PowerUpPanel");
-        panel.transform.SetParent(canvasObject.transform, false);
-
-        RectTransform panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = Vector2.zero;
-        panelRect.anchorMax = Vector2.one;
-        panelRect.offsetMin = Vector2.zero;
-        panelRect.offsetMax = Vector2.zero;
-
-        Image panelImage = panel.AddComponent<Image>();
-        panelImage.color = new Color(0f, 0f, 0f, 0.75f);
-
-        GameObject titleObject = new GameObject("Title");
-        titleObject.transform.SetParent(panel.transform, false);
-        RectTransform titleRect = titleObject.AddComponent<RectTransform>();
-        titleRect.anchorMin = new Vector2(0.5f, 0.75f);
-        titleRect.anchorMax = new Vector2(0.5f, 0.75f);
-        titleRect.sizeDelta = new Vector2(900f, 120f);
-        titleRect.anchoredPosition = Vector2.zero;
-
-        TextMeshProUGUI titleText = titleObject.AddComponent<TextMeshProUGUI>();
-        titleText.text = "WAVE CLEARED - CHOOSE AN UPGRADE";
-        titleText.fontSize = 48f;
-        titleText.color = Color.white;
-        titleText.alignment = TextAlignmentOptions.Center;
-
-        int choiceCount = 3;
-        choiceButtons = new Button[choiceCount];
-        choiceLabels = new TMP_Text[choiceCount];
-
-        float buttonWidth = 380f;
-        float spacing = 40f;
-        float totalWidth = choiceCount * buttonWidth + (choiceCount - 1) * spacing;
-        float startX = -totalWidth * 0.5f + buttonWidth * 0.5f;
-
-        for (int i = 0; i < choiceCount; i++)
-        {
-            GameObject buttonObject = new GameObject($"Choice{i}");
-            buttonObject.transform.SetParent(panel.transform, false);
-
-            RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
-            buttonRect.anchorMin = new Vector2(0.5f, 0.45f);
-            buttonRect.anchorMax = new Vector2(0.5f, 0.45f);
-            buttonRect.sizeDelta = new Vector2(buttonWidth, 220f);
-            buttonRect.anchoredPosition = new Vector2(startX + i * (buttonWidth + spacing), 0f);
-
-            Image buttonImage = buttonObject.AddComponent<Image>();
-            buttonImage.color = new Color(0.15f, 0.15f, 0.2f, 1f);
-
-            Button button = buttonObject.AddComponent<Button>();
-            button.targetGraphic = buttonImage;
-            choiceButtons[i] = button;
-
-            GameObject labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(buttonObject.transform, false);
-            RectTransform labelRect = labelObject.AddComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(16f, 16f);
-            labelRect.offsetMax = new Vector2(-16f, -16f);
-
-            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-            label.fontSize = 26f;
-            label.color = Color.white;
-            label.alignment = TextAlignmentOptions.Center;
-            choiceLabels[i] = label;
-        }
     }
 
     void ShowChoices()
@@ -212,8 +122,17 @@ public class PowerUpUI : MonoBehaviour
 
             currentChoices[i] = option;
 
-            if (i < choiceLabels.Length && choiceLabels[i] != null)
-                choiceLabels[i].text = $"{option.title}\n{option.description}";
+            if (i < choiceTitles.Length && choiceTitles[i] != null)
+                choiceTitles[i].text = option.title;
+
+            if (i < choiceDescriptions.Length && choiceDescriptions[i] != null)
+                choiceDescriptions[i].text = option.description;
+
+            if (i < choiceImages.Length && choiceImages[i] != null)
+            {
+                choiceImages[i].sprite = option.icon;
+                choiceImages[i].enabled = option.icon != null;
+            }
         }
 
         // In case availablePool ran out before filling all buttons (e.g. FullHealth
@@ -221,8 +140,16 @@ public class PowerUpUI : MonoBehaviour
         for (int i = choiceCount; i < choiceButtons.Length; i++)
         {
             currentChoices[i] = null;
-            if (choiceButtons[i] != null) choiceButtons[i].gameObject.SetActive(false);
-            else if (i < choiceLabels.Length && choiceLabels[i] != null) choiceLabels[i].text = "";
+            if (choiceButtons[i] != null)
+            {
+                choiceButtons[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                if (i < choiceTitles.Length && choiceTitles[i] != null) choiceTitles[i].text = "";
+                if (i < choiceDescriptions.Length && choiceDescriptions[i] != null) choiceDescriptions[i].text = "";
+                if (i < choiceImages.Length && choiceImages[i] != null) choiceImages[i].enabled = false;
+            }
         }
         for (int i = 0; i < choiceCount; i++)
         {
