@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 // UnityEvent<T> needs a concrete subclass to show its argument fields in the Inspector.
 [System.Serializable] public class IntEvent : UnityEvent<int> { }
@@ -29,7 +30,11 @@ public class WaveManager : MonoBehaviour
     public string enemyTag = "Enemy";
     public float spawnInterval = 5f;
 
+    [Header("UI Scene (loaded additively alongside this one)")]
+    public string uiSceneName = "MainMenu";
+
     [Header("Events (hook UI / other systems to these)")]
+    public UnityEvent OnGameBegin;           // Start button was pressed - unlock the player
     public IntEvent OnWaveStarted;           // wave index
     public IntIntEvent OnEnemiesLeftChanged; // (remaining, total)
     public FloatEvent OnCountdownChanged;    // seconds remaining
@@ -53,10 +58,16 @@ public class WaveManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        if (!string.IsNullOrEmpty(uiSceneName) && !SceneManager.GetSceneByName(uiSceneName).isLoaded)
+            SceneManager.LoadScene(uiSceneName, LoadSceneMode.Additive);
     }
 
-    void Start()
+    // Call this from the start screen's Start button once the player has picked a character/weapon.
+    public void BeginGame()
     {
+        if (IsGameOver) return;
+        OnGameBegin?.Invoke();
         StartCoroutine(RunWaves());
     }
 

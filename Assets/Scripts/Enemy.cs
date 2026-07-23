@@ -4,6 +4,7 @@ public class Enemy : MonoBehaviour
 {
     public float health = 50f;
     private Rigidbody2D rb;
+    private bool isDead;
 
     private void Start()
     {
@@ -14,10 +15,14 @@ public class Enemy : MonoBehaviour
     private void FixedUpdate()
     {
         // death
-        if (health <= 0)
+        if (health <= 0 && !isDead)
         {
-            Destroy(gameObject);
+            isDead = true;
 
+            if (WaveManager.Instance != null)
+                WaveManager.Instance.NotifyEnemyKilled();
+
+            Destroy(gameObject);
         }
     }
 
