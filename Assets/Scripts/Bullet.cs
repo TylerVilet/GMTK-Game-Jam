@@ -33,7 +33,7 @@ public class Bullet : MonoBehaviour
             }
             Destroy(gameObject); // destroy the bullet on hit
         }
-        else if (collision.gameObject.name.StartsWith("Wall") || collision.gameObject.name.StartsWith("Blockade"))
+        else if (collision.gameObject.name.StartsWith("Wall") || collision.gameObject.name.StartsWith("Asteroid"))
         {
             Destroy(gameObject); // destroy the bullet when it hits a border wall or blockade
         }

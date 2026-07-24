@@ -31,12 +31,22 @@ public class EnemyChase : MonoBehaviour
         Vector2 direction = (player.position - transform.position).normalized;
         Vector2 velocity = direction * speed;
 
-        // Chasing straight into a blockade's edge slides the movement along it
-        // instead of just pinning the enemy against it.
+        // Chasing straight into an asteroid's edge steers the movement around it
+        // instead of just pinning the enemy against the surface. Replacing the
+        // blocked component with an equal push along the tangent (rather than
+        // just zeroing it) keeps them actively moving around the obstacle
+        // instead of stalling flush against it.
         foreach (Vector2 normal in blockadeContactNormals.Values)
         {
             float into = Vector2.Dot(velocity, normal);
-            if (into < 0f) velocity -= into * normal;
+            if (into < 0f)
+            {
+                Vector2 tangent = new Vector2(-normal.y, normal.x);
+                if (Vector2.Dot(direction, tangent) < 0f) tangent = -tangent;
+
+                velocity -= into * normal;
+                velocity += tangent * Mathf.Abs(into);
+            }
         }
 
         Vector2 targetPosition = rb.position + velocity * Time.fixedDeltaTime;
@@ -53,7 +63,7 @@ public class EnemyChase : MonoBehaviour
 
     void TrackBlockadeContact(Collision2D collision)
     {
-        if (!collision.gameObject.name.StartsWith("Blockade")) return;
+        if (!collision.gameObject.name.StartsWith("Asteroid")) return;
 
         Vector2 sum = Vector2.zero;
         int count = collision.contactCount;

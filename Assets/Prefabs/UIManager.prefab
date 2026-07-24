@@ -49,7 +49,7 @@ MonoBehaviour:
     button: {fileID: 0}
     highlight: {fileID: 0}
   weaponOptions:
-  - label: Gun
+  - label: AK
     button: {fileID: 0}
     highlight: {fileID: 0}
   startButton: {fileID: 0}

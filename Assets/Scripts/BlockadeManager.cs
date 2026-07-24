@@ -3,33 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Drops a rectangular blockade into the arena at the start of every wave.
-// Player and enemies both move via dynamic Rigidbody2D (Player.rb.linearVelocity,
-// EnemyChase.rb.MovePosition), so a plain static BoxCollider2D is enough to make
-// them physically slide around it - no pathfinding needed.
+// Drops a barrage of small asteroids into the arena within the first 13s of
+// every wave, in groups of 1-3 falling at once. Player and enemies both move
+// via dynamic Rigidbody2D (Player.rb.linearVelocity, EnemyChase.rb.MovePosition),
+// so a plain static BoxCollider2D is enough to make them physically slide
+// around each asteroid - no pathfinding needed.
 public class BlockadeManager : MonoBehaviour
 {
-    const int MaxBlockades = 8;
-    const float BlockadeWidth = 3.5f;
-    const float BlockadeHeight = 3.5f;
+    const int MaxAsteroids = 30;
+    const float AsteroidWidth = 1.5f;
+    const float AsteroidHeight = 1.5f;
     const float CornerMargin = 6f;       // keep clear of the four corners
-    const float MinDistanceBetween = 6f; // never let a new one land on/next to an old one
-    const float MinDistanceFromPlayer = 6f;
+    const float EnemyFootprint = 1f;     // matches Enemy.prefab's collider size
+    const float MinGapBetween = EnemyFootprint * 2f; // 2 enemy-lengths of clearance between asteroids
+    const float MinDistanceBetween = AsteroidWidth + MinGapBetween;
     const int MaxPlacementAttempts = 30;
     const float DropHeight = 6f;
     const float DropDuration = 0.35f;
 
-    const float EarliestDropDelay = 5f;   // never before 5s into the wave
-    const float LatestDropMargin = 30f;   // never within the last 30s of the wave's time limit
-    const float WarningDuration = 1.2f;   // telegraph shown before it actually lands
+    const float BarrageWindow = 13f;     // the whole barrage happens within this many seconds of the wave starting
+    const int BarrageMinCount = 6;       // wave 0 drops 6-10 asteroids total, +1 more each wave after
+    const int BarrageMaxCount = 10;
+    const int MinSimultaneous = 1;       // 1-3 asteroids can fall together in a single drop
+    const int MaxSimultaneous = 3;
+
+    const float WarningDuration = 1.2f;  // telegraph shown before it actually lands
     const float WarningPulseSpeed = 10f;
-    const float LandingDamage = 10f;
+    const float LandingDamage = 20f;
     const float KnockbackDistance = 3.5f; // clear of the footprint if caught underneath
 
-    readonly List<GameObject> activeBlockades = new List<GameObject>();
+    readonly List<GameObject> activeAsteroids = new List<GameObject>();
     WaveManager subscribedWaveManager;
-    Coroutine scheduledDrop;
-    Sprite blockadeSprite;
+    Coroutine barrageRoutine;
+    Sprite asteroidSprite;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -41,11 +47,7 @@ public class BlockadeManager : MonoBehaviour
 
     void Awake()
     {
-        Texture2D texture = new Texture2D(1, 1);
-        texture.SetPixel(0, 0, Color.white);
-        texture.Apply();
-        blockadeSprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-
+        asteroidSprite = CreateRoundSprite();
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -54,7 +56,10 @@ public class BlockadeManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
         if (subscribedWaveManager != null)
+        {
             subscribedWaveManager.OnWaveStarted.RemoveListener(OnWaveStarted);
+            subscribedWaveManager.OnWaveCleared.RemoveListener(ClearAsteroids);
+        }
     }
 
     void Start()
@@ -65,46 +70,89 @@ public class BlockadeManager : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         StopAllCoroutines(); // cancel any pending warning/drop from the scene that just unloaded
-        scheduledDrop = null;
-        activeBlockades.Clear(); // the previous scene (and its blockades) is already gone
+        barrageRoutine = null;
+        activeAsteroids.Clear(); // the previous scene (and its asteroids) is already gone
         SubscribeToWaveManager();
     }
 
     void SubscribeToWaveManager()
     {
         if (subscribedWaveManager != null)
+        {
             subscribedWaveManager.OnWaveStarted.RemoveListener(OnWaveStarted);
+            subscribedWaveManager.OnWaveCleared.RemoveListener(ClearAsteroids);
+        }
 
         subscribedWaveManager = WaveManager.Instance;
 
         if (subscribedWaveManager != null)
+        {
             subscribedWaveManager.OnWaveStarted.AddListener(OnWaveStarted);
+            subscribedWaveManager.OnWaveCleared.AddListener(ClearAsteroids);
+        }
     }
 
     void OnWaveStarted(int waveIndex)
     {
-        if (scheduledDrop != null) StopCoroutine(scheduledDrop);
-        scheduledDrop = StartCoroutine(ScheduleDrop());
+        if (barrageRoutine != null) StopCoroutine(barrageRoutine);
+        ClearAsteroids();
+        barrageRoutine = StartCoroutine(RunBarrage(waveIndex));
     }
 
-    // Waits a random amount of time within [5s, timeLimit - 30s] of the wave's
-    // clock, then shows a warning telegraph before actually dropping the blockade.
-    IEnumerator ScheduleDrop()
+    // The asteroids from this wave are done their job once the wave clears -
+    // whatever's still standing gets cleared along with it.
+    void ClearAsteroids()
+    {
+        foreach (GameObject asteroid in activeAsteroids)
+            if (asteroid != null) Destroy(asteroid);
+        activeAsteroids.Clear();
+    }
+
+    // Splits the wave's total asteroid count into groups of 1-3 falling
+    // together, and spreads those groups across the first 13s of the wave.
+    IEnumerator RunBarrage(int waveIndex)
     {
         WaveManager wm = subscribedWaveManager;
         if (wm == null) yield break;
 
-        float latestDelay = Mathf.Max(EarliestDropDelay, wm.timeLimit - LatestDropMargin);
-        float delay = Random.Range(EarliestDropDelay, latestDelay);
-        yield return new WaitForSeconds(delay);
+        int totalCount = Random.Range(BarrageMinCount, BarrageMaxCount + 1) + waveIndex;
 
-        if (wm == null || wm.IsGameOver) yield break;
+        List<int> groups = new List<int>();
+        int remaining = totalCount;
+        while (remaining > 0)
+        {
+            int size = Mathf.Min(remaining, Random.Range(MinSimultaneous, MaxSimultaneous + 1));
+            groups.Add(size);
+            remaining -= size;
+        }
 
-        ArenaBounds bounds = FindFirstObjectByType<ArenaBounds>();
-        if (bounds == null) yield break;
+        List<float> startTimes = new List<float>();
+        for (int i = 0; i < groups.Count; i++)
+            startTimes.Add(Random.Range(0f, BarrageWindow));
+        startTimes.Sort();
 
-        Vector2 position = FindPosition(bounds);
+        float elapsed = 0f;
+        for (int i = 0; i < groups.Count; i++)
+        {
+            float wait = Mathf.Max(0f, startTimes[i] - elapsed);
+            yield return new WaitForSeconds(wait);
+            elapsed += wait;
 
+            if (wm == null || wm.IsGameOver) yield break;
+
+            ArenaBounds bounds = FindFirstObjectByType<ArenaBounds>();
+            if (bounds == null) continue;
+
+            for (int j = 0; j < groups[i]; j++)
+            {
+                Vector2 position = FindPosition(bounds);
+                StartCoroutine(WarnAndDrop(position));
+            }
+        }
+    }
+
+    IEnumerator WarnAndDrop(Vector2 position)
+    {
         GameObject warning = CreateWarningMarker(position);
         float elapsed = 0f;
         while (elapsed < WarningDuration)
@@ -119,56 +167,55 @@ public class BlockadeManager : MonoBehaviour
         }
         if (warning != null) Destroy(warning);
 
-        if (wm == null || wm.IsGameOver) yield break;
-        SpawnBlockade(position);
+        if (subscribedWaveManager == null || subscribedWaveManager.IsGameOver) yield break;
+        SpawnAsteroid(position);
     }
 
     GameObject CreateWarningMarker(Vector2 position)
     {
-        GameObject warning = new GameObject("BlockadeWarning");
+        GameObject warning = new GameObject("AsteroidWarning");
         warning.transform.position = new Vector3(position.x, position.y, 0f);
-        warning.transform.localScale = new Vector3(BlockadeWidth, BlockadeHeight, 1f);
+        warning.transform.localScale = new Vector3(AsteroidWidth, AsteroidHeight, 1f);
 
         SpriteRenderer renderer = warning.AddComponent<SpriteRenderer>();
-        renderer.sprite = blockadeSprite;
+        renderer.sprite = asteroidSprite;
         renderer.color = new Color(1f, 0.15f, 0.1f, 0.35f);
         renderer.sortingOrder = 1;
 
         return warning;
     }
 
-    void SpawnBlockade(Vector2 position)
+    void SpawnAsteroid(Vector2 position)
     {
-        if (activeBlockades.Count >= MaxBlockades)
+        if (activeAsteroids.Count >= MaxAsteroids)
         {
-            GameObject oldest = activeBlockades[0];
-            activeBlockades.RemoveAt(0);
+            GameObject oldest = activeAsteroids[0];
+            activeAsteroids.RemoveAt(0);
             if (oldest != null) Destroy(oldest);
         }
 
-        GameObject blockade = new GameObject("Blockade");
-        blockade.transform.localScale = new Vector3(BlockadeWidth, BlockadeHeight, 1f);
+        GameObject asteroid = new GameObject("Asteroid");
+        asteroid.transform.localScale = new Vector3(AsteroidWidth, AsteroidHeight, 1f);
 
-        SpriteRenderer renderer = blockade.AddComponent<SpriteRenderer>();
-        renderer.sprite = blockadeSprite;
-        renderer.color = new Color(0.5f, 0.36f, 0.22f);
+        SpriteRenderer renderer = asteroid.AddComponent<SpriteRenderer>();
+        renderer.sprite = asteroidSprite;
+        renderer.color = new Color(0.42f, 0.39f, 0.36f);
 
-        BoxCollider2D collider = blockade.AddComponent<BoxCollider2D>();
+        BoxCollider2D collider = asteroid.AddComponent<BoxCollider2D>();
         collider.enabled = false; // turned on once it lands, so it can't clip anything mid-drop
 
-        activeBlockades.Add(blockade);
-        StartCoroutine(DropIn(blockade, position));
+        activeAsteroids.Add(asteroid);
+        StartCoroutine(DropIn(asteroid, position));
     }
 
-    // Rejection-samples a spot away from the corners, other blockades, and the
-    // player. Falls back to the least-bad candidate seen if nothing fully qualifies.
+    // Rejection-samples a spot anywhere in the arena away from the corners and
+    // other asteroids - the player's position doesn't factor in, so a barrage
+    // can land anywhere, including right where the player's standing. Falls
+    // back to the least-bad candidate seen if nothing fully qualifies.
     Vector2 FindPosition(ArenaBounds bounds)
     {
-        float halfW = bounds.halfWidth - BlockadeWidth * 0.5f - 1f;
-        float halfH = bounds.halfHeight - BlockadeHeight * 0.5f - 1f;
-
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        Vector2? playerPos = playerObject != null ? (Vector2?)playerObject.transform.position : null;
+        float halfW = bounds.halfWidth - AsteroidWidth * 0.5f - 1f;
+        float halfH = bounds.halfHeight - AsteroidHeight * 0.5f - 1f;
 
         Vector2 best = Vector2.zero;
         float bestMargin = float.MinValue;
@@ -182,13 +229,11 @@ public class BlockadeManager : MonoBehaviour
             if (nearVerticalEdge && nearHorizontalEdge) continue; // sitting in a corner
 
             float margin = float.MaxValue;
-            foreach (GameObject existing in activeBlockades)
+            foreach (GameObject existing in activeAsteroids)
             {
                 if (existing == null) continue;
                 margin = Mathf.Min(margin, Vector2.Distance(candidate, existing.transform.position) - MinDistanceBetween);
             }
-            if (playerPos.HasValue)
-                margin = Mathf.Min(margin, Vector2.Distance(candidate, playerPos.Value) - MinDistanceFromPlayer);
 
             if (margin >= 0f) return candidate;
 
@@ -202,12 +247,12 @@ public class BlockadeManager : MonoBehaviour
         return best;
     }
 
-    IEnumerator DropIn(GameObject blockade, Vector2 restPosition)
+    IEnumerator DropIn(GameObject asteroid, Vector2 restPosition)
     {
         Vector3 restPos3 = new Vector3(restPosition.x, restPosition.y, 0f);
         Vector3 startPos = restPos3 + new Vector3(0f, DropHeight, 0f);
 
-        Transform t = blockade.transform;
+        Transform t = asteroid.transform;
         t.position = startPos;
 
         float elapsed = 0f;
@@ -223,7 +268,7 @@ public class BlockadeManager : MonoBehaviour
         if (t == null) yield break;
         t.position = restPos3;
 
-        BoxCollider2D collider = blockade.GetComponent<BoxCollider2D>();
+        BoxCollider2D collider = asteroid.GetComponent<BoxCollider2D>();
         if (collider != null) collider.enabled = true;
 
         ApplyLandingImpact(restPos3);
@@ -233,7 +278,7 @@ public class BlockadeManager : MonoBehaviour
     // gets knocked clear of it, so nothing ends up stuck underneath.
     void ApplyLandingImpact(Vector3 center)
     {
-        Vector2 size = new Vector2(BlockadeWidth, BlockadeHeight);
+        Vector2 size = new Vector2(AsteroidWidth, AsteroidHeight);
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, size, 0f);
 
         foreach (Collider2D hit in hits)
@@ -259,5 +304,25 @@ public class BlockadeManager : MonoBehaviour
                 if (enemy != null) enemy.TakeDamage(LandingDamage);
             }
         }
+    }
+
+    static Sprite CreateRoundSprite()
+    {
+        const int size = 32;
+        Texture2D texture = new Texture2D(size, size);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size / 2f - 1f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), center);
+                texture.SetPixel(x, y, dist <= radius ? Color.white : Color.clear);
+            }
+        }
+        texture.Apply();
+
+        return Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size);
     }
 }

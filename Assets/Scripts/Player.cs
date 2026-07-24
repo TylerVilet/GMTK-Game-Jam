@@ -99,7 +99,7 @@ public class Player : MonoBehaviour
 
     void TrackBlockadeContact(Collision2D collision)
     {
-        if (!collision.gameObject.name.StartsWith("Blockade")) return;
+        if (!collision.gameObject.name.StartsWith("Asteroid")) return;
 
         Vector2 sum = Vector2.zero;
         int count = collision.contactCount;
