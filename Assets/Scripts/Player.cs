@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
@@ -9,6 +10,8 @@ public class Player : MonoBehaviour
     public float maxHealth = 30f;
     public float health = 30f;
     public float dashDistance = 0.5f;
+
+    readonly Dictionary<Collider2D, Vector2> blockadeContactNormals = new Dictionary<Collider2D, Vector2>();
 
     [Header("Dash")]
     public float dashSpeed = 15f;
@@ -70,8 +73,39 @@ public class Player : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = direction.normalized * speed;
+            rb.linearVelocity = SlideAlongBlockades(direction.normalized * speed);
         }
+    }
+
+    // Pressing into a blockade's edge slides the velocity along it instead of
+    // just stopping dead against it.
+    Vector2 SlideAlongBlockades(Vector2 velocity)
+    {
+        foreach (Vector2 normal in blockadeContactNormals.Values)
+        {
+            float into = Vector2.Dot(velocity, normal);
+            if (into < 0f) velocity -= into * normal;
+        }
+        return velocity;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision) => TrackBlockadeContact(collision);
+    void OnCollisionStay2D(Collision2D collision) => TrackBlockadeContact(collision);
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        blockadeContactNormals.Remove(collision.collider);
+    }
+
+    void TrackBlockadeContact(Collision2D collision)
+    {
+        if (!collision.gameObject.name.StartsWith("Blockade")) return;
+
+        Vector2 sum = Vector2.zero;
+        int count = collision.contactCount;
+        for (int i = 0; i < count; i++) sum += collision.GetContact(i).normal;
+
+        if (count > 0) blockadeContactNormals[collision.collider] = (sum / count).normalized;
     }
 
     void StartDash(Vector2 direction)
