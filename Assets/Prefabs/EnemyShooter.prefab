@@ -113,6 +113,11 @@ MonoBehaviour:
   enemy: {fileID: 1150334167854848385}
   orbitRadius: 1
   detectionRange: 12
+  shootSound: {fileID: 8300000, guid: 98df746539254c14f80f4cdbbcca5752, type: 3}
+  clipStartTime: 0.5
+  clipEndTime: 1
+  audioSourcePoolSize: 4
+  shootVolume: 0.3
   damageMultiplier: 1
   rangeMultiplier: 1
 --- !u!1 &6028980619488143927
