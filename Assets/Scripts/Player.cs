@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 public class Player : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class Player : MonoBehaviour
 
 
     public TMP_Text healthText;
+    public Image healthBarFill;
 
 
     void Start()
@@ -33,7 +35,7 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
 
-        healthText.text = health + "/" + maxHealth;
+        RefreshHealthUI();
     }
 
     private void Update()
@@ -141,7 +143,7 @@ public class Player : MonoBehaviour
             WaveManager.Instance.GameOver();
         }
 
-        healthText.text = health + "/" + maxHealth; 
+        RefreshHealthUI();
     }
     public void EnableMovement()
     {
@@ -150,6 +152,13 @@ public class Player : MonoBehaviour
 
     public void updateHealthUI()
     {
+        RefreshHealthUI();
+    }
+
+    void RefreshHealthUI()
+    {
         healthText.text = health + "/" + maxHealth;
+        if (healthBarFill != null)
+            healthBarFill.fillAmount = maxHealth > 0f ? health / maxHealth : 0f;
     }
 }
