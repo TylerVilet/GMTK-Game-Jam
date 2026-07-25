@@ -7,6 +7,7 @@ TagManager:
   - Enemy
   - EnemyBullet
   - EnemyBulletSniper
+  - Weapon
   layers:
   - Default
   - TransparentFX

@@ -39,6 +39,7 @@ public class StartScreenUI : MonoBehaviour
 
     public static class GameSelection
     {
+        public static GameObject SelectedCharacterPrefab;
         public static GameObject SelectedWeaponPrefab;
     }
 
@@ -71,6 +72,7 @@ public class StartScreenUI : MonoBehaviour
     {
         selectedCharacterIndex = index;
         characterButtonLabel.text = characterOptions[index].label;
+        GameSelection.SelectedCharacterPrefab = characterOptions[index].weaponPrefab; // the field name is misleading here — it's actually the character prefab
         ShowMainPage();
         RefreshStartButton();
     }

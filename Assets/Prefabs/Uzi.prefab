@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 1574137648625743968}
   m_Layer: 0
   m_Name: Uzi
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -171,10 +171,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Gun
   projectilePrefab: {fileID: 8664996216585492370, guid: 5a0133c6cf9436f4c839a3b96fb9ec67, type: 3}
   firePoint: {fileID: 8453685372911243205}
-  fireRate: 0.15
+  fireRate: 0.2
   projectileSpeed: 8
   player: {fileID: 0}
   orbitRadius: 1
+  visualRenderer: {fileID: 0}
   shootSound: {fileID: 8300000, guid: b8b4aec97b826984eb578e34caf55cb2, type: 3}
   clipStartTime: 1
   clipEndTime: 2
