@@ -34,6 +34,9 @@ public class Gun : MonoBehaviour
     {
         mainCamera = Camera.main;
         BuildAudioSourcePool();
+
+        if (visualRenderer == null)
+            visualRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     void BuildAudioSourcePool()
