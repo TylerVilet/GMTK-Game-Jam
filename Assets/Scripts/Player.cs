@@ -6,6 +6,10 @@ using static StartScreenUI;
 public class Player : MonoBehaviour
 {
 
+    // Read by CharacterVisual so the player faces the same way as whichever
+    // weapon is currently active (set by that weapon, not by Player itself).
+    public static Vector2 AimDirection { get; set; } = Vector2.right;
+
     public Rigidbody2D rb;
     public float speed = 5f;
     public float maxHealth = 30f;
@@ -43,11 +47,19 @@ public class Player : MonoBehaviour
     {
         if (GameSelection.SelectedWeaponPrefab == null) return;
 
-        GameObject gunObject = Instantiate(GameSelection.SelectedWeaponPrefab);
-        Gun gun = gunObject.GetComponent<Gun>();
+        GameObject weaponObject = Instantiate(GameSelection.SelectedWeaponPrefab);
+
+        Gun gun = weaponObject.GetComponent<Gun>();
         if (gun != null)
         {
             gun.SetPlayer(transform);
+            return;
+        }
+
+        SwordWeapon sword = weaponObject.GetComponent<SwordWeapon>();
+        if (sword != null)
+        {
+            sword.SetPlayer(transform);
         }
     }
 

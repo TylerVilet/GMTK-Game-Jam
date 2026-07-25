@@ -24,9 +24,6 @@ public class Gun : MonoBehaviour
     public float damageMultiplier = 1f;
     public float rangeMultiplier = 1f;
 
-    // Read by CharacterVisual so the player faces the same way as the gun.
-    public static Vector2 AimDirection { get; private set; } = Vector2.right;
-
     private float fireTimer = 0f;
     private Camera mainCamera;
 
@@ -69,7 +66,7 @@ public class Gun : MonoBehaviour
             new Vector3(mouseScreenPos.x, mouseScreenPos.y, mainCamera.nearClipPlane)
         );
         Vector2 direction = ((Vector2)mouseWorldPos - (Vector2)player.position).normalized;
-        AimDirection = direction;
+        Player.AimDirection = direction;
 
         transform.position = (Vector2)player.position + direction * orbitRadius;
 
