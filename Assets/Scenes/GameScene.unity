@@ -1115,7 +1115,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.62352943, g: 0.62352943, b: 0.62352943, a: 1}
+  m_BackGroundColor: {r: 0.047, g: 0.05, b: 0.078, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2650,6 +2650,7 @@ MonoBehaviour:
   fireRate: 0.25
   projectileSpeed: 10
   player: {fileID: 2063981080}
+  visualRenderer: {fileID: 1140189366}
   orbitRadius: 1
   damageMultiplier: 1
   rangeMultiplier: 1

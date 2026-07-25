@@ -11,19 +11,17 @@ using UnityEngine.SceneManagement;
 public class BlockadeManager : MonoBehaviour
 {
     const int MaxAsteroids = 30;
-    const float AsteroidWidth = 1.5f;
-    const float AsteroidHeight = 1.5f;
+    static readonly float[] AsteroidSizes = { 1f, 1.5f, 2.2f }; // small / medium / large - picked per asteroid
     const float CornerMargin = 6f;       // keep clear of the four corners
     const float EnemyFootprint = 1f;     // matches Enemy.prefab's collider size
-    const float MinGapBetween = EnemyFootprint * 2f; // 2 enemy-lengths of clearance between asteroids
-    const float MinDistanceBetween = AsteroidWidth + MinGapBetween;
-    const int MaxPlacementAttempts = 30;
+    const float EdgeClearance = EnemyFootprint * 3f; // guaranteed gap between two asteroids' edges, regardless of their sizes
+    const int MaxPlacementAttempts = 50;
     const float DropHeight = 6f;
     const float DropDuration = 0.35f;
 
     const float BarrageWindow = 13f;     // the whole barrage happens within this many seconds of the wave starting
-    const int BarrageMinCount = 6;       // wave 0 drops 6-10 asteroids total, +1 more each wave after
-    const int BarrageMaxCount = 10;
+    const int BarrageMinCount = 4;       // wave 0 drops 4-7 asteroids total, +1 more each wave after
+    const int BarrageMaxCount = 7;
     const int MinSimultaneous = 1;       // 1-3 asteroids can fall together in a single drop
     const int MaxSimultaneous = 3;
 
@@ -47,7 +45,10 @@ public class BlockadeManager : MonoBehaviour
 
     void Awake()
     {
-        asteroidSprite = CreateRoundSprite();
+        // Loaded from Resources rather than wired in the Inspector - this
+        // component is created entirely from code (see Bootstrap below), so
+        // there's no scene object to hang a serialized field reference off of.
+        asteroidSprite = Resources.Load<Sprite>("asteroid");
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -145,15 +146,16 @@ public class BlockadeManager : MonoBehaviour
 
             for (int j = 0; j < groups[i]; j++)
             {
-                Vector2 position = FindPosition(bounds);
-                StartCoroutine(WarnAndDrop(position));
+                float size = AsteroidSizes[Random.Range(0, AsteroidSizes.Length)];
+                Vector2 position = FindPosition(bounds, size);
+                StartCoroutine(WarnAndDrop(position, size));
             }
         }
     }
 
-    IEnumerator WarnAndDrop(Vector2 position)
+    IEnumerator WarnAndDrop(Vector2 position, float size)
     {
-        GameObject warning = CreateWarningMarker(position);
+        GameObject warning = CreateWarningMarker(position, size);
         float elapsed = 0f;
         while (elapsed < WarningDuration)
         {
@@ -168,24 +170,25 @@ public class BlockadeManager : MonoBehaviour
         if (warning != null) Destroy(warning);
 
         if (subscribedWaveManager == null || subscribedWaveManager.IsGameOver) yield break;
-        SpawnAsteroid(position);
+        SpawnAsteroid(position, size);
     }
 
-    GameObject CreateWarningMarker(Vector2 position)
+    GameObject CreateWarningMarker(Vector2 position, float size)
     {
         GameObject warning = new GameObject("AsteroidWarning");
         warning.transform.position = new Vector3(position.x, position.y, 0f);
-        warning.transform.localScale = new Vector3(AsteroidWidth, AsteroidHeight, 1f);
+        warning.transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
+        warning.transform.localScale = new Vector3(size, size, 1f);
 
         SpriteRenderer renderer = warning.AddComponent<SpriteRenderer>();
         renderer.sprite = asteroidSprite;
-        renderer.color = new Color(1f, 0.15f, 0.1f, 0.35f);
+        renderer.color = new Color(1f, 0.15f, 0.1f, 0.35f); // red tint over the real art, not its true color
         renderer.sortingOrder = 1;
 
         return warning;
     }
 
-    void SpawnAsteroid(Vector2 position)
+    void SpawnAsteroid(Vector2 position, float size)
     {
         if (activeAsteroids.Count >= MaxAsteroids)
         {
@@ -195,11 +198,12 @@ public class BlockadeManager : MonoBehaviour
         }
 
         GameObject asteroid = new GameObject("Asteroid");
-        asteroid.transform.localScale = new Vector3(AsteroidWidth, AsteroidHeight, 1f);
+        asteroid.transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f)); // so a run of asteroids never reads as identical stamped copies
+        asteroid.transform.localScale = new Vector3(size, size, 1f);
 
         SpriteRenderer renderer = asteroid.AddComponent<SpriteRenderer>();
         renderer.sprite = asteroidSprite;
-        renderer.color = new Color(0.42f, 0.39f, 0.36f);
+        renderer.color = Color.white; // show the real art's own colors, no tint
 
         BoxCollider2D collider = asteroid.AddComponent<BoxCollider2D>();
         collider.enabled = false; // turned on once it lands, so it can't clip anything mid-drop
@@ -208,43 +212,73 @@ public class BlockadeManager : MonoBehaviour
         StartCoroutine(DropIn(asteroid, position));
     }
 
-    // Rejection-samples a spot anywhere in the arena away from the corners and
-    // other asteroids - the player's position doesn't factor in, so a barrage
-    // can land anywhere, including right where the player's standing. Falls
-    // back to the least-bad candidate seen if nothing fully qualifies.
-    Vector2 FindPosition(ArenaBounds bounds)
+    // Finds a spot anywhere in the arena away from other asteroids - the
+    // player's position doesn't factor in, so a barrage can land anywhere,
+    // including right where the player's standing.
+    //
+    // The candidate range goes all the way out to the wall line rather than
+    // stopping a full asteroid-width short of it, so asteroids can land
+    // overlapping the edge - anywhere from barely clipping it to about half
+    // hanging out past the boundary - instead of always sitting fully inside.
+    // That also opens up a lot more usable placement area near the edges,
+    // which helps the spacing rule below actually find room in a crowded arena.
+    //
+    // Tries progressively more lenient passes rather than a single one with a
+    // generic "best effort" fallback, so a crowded arena relaxes the corner
+    // rule (harmless) long before it ever relaxes asteroid-to-asteroid
+    // spacing (which is what caused them to visibly touch/overlap).
+    Vector2 FindPosition(ArenaBounds bounds, float size)
     {
-        float halfW = bounds.halfWidth - AsteroidWidth * 0.5f - 1f;
-        float halfH = bounds.halfHeight - AsteroidHeight * 0.5f - 1f;
+        float halfW = bounds.halfWidth;
+        float halfH = bounds.halfHeight;
 
-        Vector2 best = Vector2.zero;
-        float bestMargin = float.MinValue;
+        Vector2? pos = TrySample(halfW, halfH, respectCorners: true, size, edgeClearance: EdgeClearance);
+        if (pos.HasValue) return pos.Value;
 
+        pos = TrySample(halfW, halfH, respectCorners: false, size, edgeClearance: EdgeClearance);
+        if (pos.HasValue) return pos.Value;
+
+        // Last resort: still never allow full overlap, just accept tighter
+        // spacing than the "enemy can squeeze through" rule normally wants.
+        pos = TrySample(halfW, halfH, respectCorners: false, size, edgeClearance: 0f);
+        if (pos.HasValue) return pos.Value;
+
+        return new Vector2(Random.Range(-halfW, halfW), Random.Range(-halfH, halfH));
+    }
+
+    // minDistance is computed per existing asteroid from both its actual size
+    // and the new one's, so the required gap always matches whatever sizes
+    // are actually involved instead of assuming a single fixed asteroid size.
+    Vector2? TrySample(float halfW, float halfH, bool respectCorners, float size, float edgeClearance)
+    {
         for (int attempt = 0; attempt < MaxPlacementAttempts; attempt++)
         {
             Vector2 candidate = new Vector2(Random.Range(-halfW, halfW), Random.Range(-halfH, halfH));
 
-            bool nearVerticalEdge = Mathf.Abs(candidate.x) > halfW - CornerMargin;
-            bool nearHorizontalEdge = Mathf.Abs(candidate.y) > halfH - CornerMargin;
-            if (nearVerticalEdge && nearHorizontalEdge) continue; // sitting in a corner
+            if (respectCorners)
+            {
+                bool nearVerticalEdge = Mathf.Abs(candidate.x) > halfW - CornerMargin;
+                bool nearHorizontalEdge = Mathf.Abs(candidate.y) > halfH - CornerMargin;
+                if (nearVerticalEdge && nearHorizontalEdge) continue; // sitting in a corner
+            }
 
-            float margin = float.MaxValue;
+            bool clear = true;
             foreach (GameObject existing in activeAsteroids)
             {
                 if (existing == null) continue;
-                margin = Mathf.Min(margin, Vector2.Distance(candidate, existing.transform.position) - MinDistanceBetween);
+                float existingSize = existing.transform.localScale.x;
+                float minDistance = (size + existingSize) * 0.5f + edgeClearance;
+                if (Vector2.Distance(candidate, existing.transform.position) < minDistance)
+                {
+                    clear = false;
+                    break;
+                }
             }
 
-            if (margin >= 0f) return candidate;
-
-            if (margin > bestMargin)
-            {
-                bestMargin = margin;
-                best = candidate;
-            }
+            if (clear) return candidate;
         }
 
-        return best;
+        return null;
     }
 
     IEnumerator DropIn(GameObject asteroid, Vector2 restPosition)
@@ -271,14 +305,14 @@ public class BlockadeManager : MonoBehaviour
         BoxCollider2D collider = asteroid.GetComponent<BoxCollider2D>();
         if (collider != null) collider.enabled = true;
 
-        ApplyLandingImpact(restPos3);
+        ApplyLandingImpact(restPos3, t.localScale.x);
     }
 
     // Anything still standing in the footprint when it lands takes damage and
     // gets knocked clear of it, so nothing ends up stuck underneath.
-    void ApplyLandingImpact(Vector3 center)
+    void ApplyLandingImpact(Vector3 center, float asteroidSize)
     {
-        Vector2 size = new Vector2(AsteroidWidth, AsteroidHeight);
+        Vector2 size = new Vector2(asteroidSize, asteroidSize);
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, size, 0f);
 
         foreach (Collider2D hit in hits)
@@ -304,25 +338,5 @@ public class BlockadeManager : MonoBehaviour
                 if (enemy != null) enemy.TakeDamage(LandingDamage);
             }
         }
-    }
-
-    static Sprite CreateRoundSprite()
-    {
-        const int size = 32;
-        Texture2D texture = new Texture2D(size, size);
-        Vector2 center = new Vector2(size / 2f, size / 2f);
-        float radius = size / 2f - 1f;
-
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                float dist = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), center);
-                texture.SetPixel(x, y, dist <= radius ? Color.white : Color.clear);
-            }
-        }
-        texture.Apply();
-
-        return Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size);
     }
 }

@@ -10,6 +10,7 @@ public class Gun : MonoBehaviour
     [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private Transform player; // drag your player object in here
     [SerializeField] private float orbitRadius = 1f; // how far the gun sits from the player
+    [SerializeField] private SpriteRenderer visualRenderer;
 
     [Header("Shoot Sound")]
     [SerializeField] private AudioClip shootSound;
@@ -22,6 +23,9 @@ public class Gun : MonoBehaviour
     // touching the bullet prefab's own base values.
     public float damageMultiplier = 1f;
     public float rangeMultiplier = 1f;
+
+    // Read by CharacterVisual so the player faces the same way as the gun.
+    public static Vector2 AimDirection { get; private set; } = Vector2.right;
 
     private float fireTimer = 0f;
     private Camera mainCamera;
@@ -65,11 +69,24 @@ public class Gun : MonoBehaviour
             new Vector3(mouseScreenPos.x, mouseScreenPos.y, mainCamera.nearClipPlane)
         );
         Vector2 direction = ((Vector2)mouseWorldPos - (Vector2)player.position).normalized;
+        AimDirection = direction;
 
         transform.position = (Vector2)player.position + direction * orbitRadius;
 
+        // Rotate the gun to face outward (same direction it's orbiting toward).
+        // Plain continuous rotation - always tracks the mouse 1:1, no popping
+        // or reversed sweeps. (A left/right sprite swap was tried here, but
+        // mirroring the art to keep it "right side up" also reverses which
+        // way it visually rotates relative to the mouse - felt broken.)
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+
+        // Past vertical (aiming into the left half), the rotation alone would
+        // leave the art upside-down. Flipping the sprite top-to-bottom at
+        // that point corrects the "which way is up" reading without touching
+        // the rotation value itself, so the mouse-tracking above is unaffected.
+        if (visualRenderer != null)
+            visualRenderer.flipY = direction.x < 0f;
     }
 
     void Shoot()
