@@ -64,4 +64,9 @@ public class CameraFollow : MonoBehaviour
 
         return new Vector3(x, y, position.z);
     }
+
+    public void SetPlayer(Transform playerTransform)
+    {
+        player = playerTransform;
+    }
 }

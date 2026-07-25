@@ -29,6 +29,9 @@ public class PlayerSpawner : MonoBehaviour
             playerScript.enabled = true;
         }
 
-        // Weapon spawning is already handled by Player.Start() -> EquipSelectedWeapon()
+        // NEW: tell the camera who to follow
+        CameraFollow cameraFollow = Camera.main != null ? Camera.main.GetComponent<CameraFollow>() : null;
+        if (cameraFollow != null)
+            cameraFollow.SetPlayer(player.transform);
     }
 }
