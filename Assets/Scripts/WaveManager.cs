@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 // UnityEvent<T> needs a concrete subclass to show its argument fields in the Inspector.
 [System.Serializable] public class IntEvent : UnityEvent<int> { }
@@ -34,6 +35,8 @@ public class WaveManager : MonoBehaviour
     [Header("UI Scene (loaded additively alongside this one)")]
     public string uiSceneName = "MainMenu";
 
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI waveText;
 
     [Header("Events (hook UI / other systems to these)")]
     public UnityEvent OnGameBegin;           // Start button was pressed - unlock the player
@@ -123,6 +126,7 @@ public class WaveManager : MonoBehaviour
         BuildEligiblePrefabs();
 
         OnWaveStarted?.Invoke(CurrentWaveIndex);
+        UpdateWaveText();
         Debug.Log($"[WaveManager] Wave {CurrentWaveIndex} started: {enemyCount} enemies, {timeLimit}s to clear.");
 
         EnemiesRemaining = enemyCount;
@@ -142,6 +146,12 @@ public class WaveManager : MonoBehaviour
         }
 
         waveActive = false;
+    }
+
+    void UpdateWaveText()
+    {
+        if (waveText != null)
+            waveText.text = $"Wave {CurrentWaveIndex + 1}"; // +1 so it displays as 1-based to the player
     }
 
     void BuildEligiblePrefabs()

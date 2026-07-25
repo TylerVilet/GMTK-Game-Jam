@@ -10,21 +10,31 @@ public class Enemy : MonoBehaviour
     private bool isDead = false;
     [SerializeField] private int scoreValue = 10;
 
+    private SpriteRenderer spriteRenderer;
+    private Transform playerTransform;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
 
-        
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+            playerTransform = playerObj.transform;
+    }
+
+    private void Update()
+    {
+        FacePlayer();
     }
 
     public void TakeDamage(float damage)
     {
         if (isDead) return;
-
         health -= damage;
         Debug.Log("Health: " + health);
-
         if (health <= 0)
         {
             Die();
@@ -60,5 +70,12 @@ public class Enemy : MonoBehaviour
                 lastHitTime = Time.time;
             }
         }
+    }
+
+    private void FacePlayer()
+    {
+        if (playerTransform == null || spriteRenderer == null) return;
+
+        spriteRenderer.flipX = playerTransform.position.x < transform.position.x;
     }
 }
