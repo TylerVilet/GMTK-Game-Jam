@@ -108,11 +108,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyShooter
   projectilePrefab: {fileID: 8564809980351287200, guid: dc5e37f11e67e224290d9d265bc4e16a, type: 3}
   firePoint: {fileID: 2662145378715830183}
-  fireRate: 1
+  fireRate: 2.5
   projectileSpeed: 16
   enemy: {fileID: 9121720648896221643}
   orbitRadius: 1
-  detectionRange: 16
+  detectionRange: 20
   shootSound: {fileID: 8300000, guid: 11ac35012a91cf9479b36976fdac2734, type: 3}
   clipStartTime: 0
   clipEndTime: 1
