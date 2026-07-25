@@ -114,4 +114,9 @@ public class Gun : MonoBehaviour
     {
         enabled = true;
     }
+
+    public void SetPlayer(Transform playerTransform)
+    {
+        player = playerTransform;
+    }
 }

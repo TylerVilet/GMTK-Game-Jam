@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
+using static StartScreenUI;
 public class Player : MonoBehaviour
 {
 
@@ -34,6 +35,20 @@ public class Player : MonoBehaviour
         rb.freezeRotation = true;
 
         healthText.text = health + "/" + maxHealth;
+
+        EquipSelectedWeapon();
+    }
+
+    void EquipSelectedWeapon()
+    {
+        if (GameSelection.SelectedWeaponPrefab == null) return;
+
+        GameObject gunObject = Instantiate(GameSelection.SelectedWeaponPrefab);
+        Gun gun = gunObject.GetComponent<Gun>();
+        if (gun != null)
+        {
+            gun.SetPlayer(transform);
+        }
     }
 
     private void Update()
