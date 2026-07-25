@@ -1,10 +1,15 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using TMPro;
+using static StartScreenUI;
 public class Player : MonoBehaviour
 {
+
+    // Read by CharacterVisual so the player faces the same way as whichever
+    // weapon is currently active (set by that weapon, not by Player itself).
+    public static Vector2 AimDirection { get; set; } = Vector2.right;
 
     public Rigidbody2D rb;
     public float speed = 5f;
@@ -36,6 +41,28 @@ public class Player : MonoBehaviour
         rb.freezeRotation = true;
 
         RefreshHealthUI();
+
+        EquipSelectedWeapon();
+    }
+
+    void EquipSelectedWeapon()
+    {
+        if (GameSelection.SelectedWeaponPrefab == null) return;
+
+        GameObject weaponObject = Instantiate(GameSelection.SelectedWeaponPrefab);
+
+        Gun gun = weaponObject.GetComponent<Gun>();
+        if (gun != null)
+        {
+            gun.SetPlayer(transform);
+            return;
+        }
+
+        SwordWeapon sword = weaponObject.GetComponent<SwordWeapon>();
+        if (sword != null)
+        {
+            sword.SetPlayer(transform);
+        }
     }
 
     private void Update()

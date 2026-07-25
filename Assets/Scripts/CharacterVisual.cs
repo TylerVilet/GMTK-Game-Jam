@@ -1,9 +1,9 @@
 using UnityEngine;
 
-// Swaps between a left-facing and right-facing sprite based on where the gun
-// is aiming (not movement direction - twin-stick shooter convention), and
-// bounces faster while walking vs. idling - a stand-in for a real walk-cycle
-// until there's separate leg/torso art to animate frame by frame.
+// Swaps between a left-facing and right-facing sprite based on where the
+// active weapon is aiming (not movement direction - twin-stick shooter
+// convention), and bounces faster while walking vs. idling - a stand-in for
+// a real walk-cycle until there's separate leg/torso art to animate frame by frame.
 public class CharacterVisual : MonoBehaviour
 {
     public Sprite leftSprite;
@@ -32,7 +32,7 @@ public class CharacterVisual : MonoBehaviour
         Vector2 velocity = parentRb != null ? parentRb.linearVelocity : Vector2.zero;
         bool isMoving = velocity.sqrMagnitude > speedThreshold * speedThreshold;
 
-        float aimX = Gun.AimDirection.x;
+        float aimX = Player.AimDirection.x;
         if (aimX > 0.05f && rightSprite != null)
             sr.sprite = rightSprite;
         else if (aimX < -0.05f && leftSprite != null)

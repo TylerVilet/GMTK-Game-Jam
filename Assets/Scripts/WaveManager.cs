@@ -78,6 +78,9 @@ public class WaveManager : MonoBehaviour
 
         if (!string.IsNullOrEmpty(uiSceneName))
             SceneManager.UnloadSceneAsync(uiSceneName);
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.Play();
     }
 
 

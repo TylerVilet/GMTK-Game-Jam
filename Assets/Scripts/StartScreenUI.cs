@@ -10,6 +10,8 @@ public class StartScreenUI : MonoBehaviour
     {
         public string label;
         public Button button;
+        public GameObject weaponPrefab; // NEW - drag AK prefab / Uzi prefab here
+
     }
 
     [Header("Main Page")]
@@ -34,6 +36,12 @@ public class StartScreenUI : MonoBehaviour
     int selectedCharacterIndex = -1;
     int selectedWeaponIndex = -1;
 
+
+    public static class GameSelection
+    {
+        public static GameObject SelectedWeaponPrefab;
+    }
+
     void Start()
     {
         ShowMainPage();
@@ -57,6 +65,8 @@ public class StartScreenUI : MonoBehaviour
         }
     }
 
+
+
     void SelectCharacter(int index)
     {
         selectedCharacterIndex = index;
@@ -69,6 +79,7 @@ public class StartScreenUI : MonoBehaviour
     {
         selectedWeaponIndex = index;
         weaponButtonLabel.text = weaponOptions[index].label;
+        GameSelection.SelectedWeaponPrefab = weaponOptions[index].weaponPrefab;
         ShowMainPage();
         RefreshStartButton();
     }
