@@ -79,8 +79,10 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        Key dashKey = SettingsManager.Instance != null ? SettingsManager.Instance.DashKey : Key.LeftShift;
-        if (Keyboard.current[dashKey].wasPressedThisFrame) dashQueued = true;
+        SettingsManager.InputBinding dashBinding = SettingsManager.Instance != null
+            ? SettingsManager.Instance.DashBinding
+            : SettingsManager.InputBinding.FromKey(Key.LeftShift);
+        if (dashBinding.WasPressedThisFrame()) dashQueued = true;
     }
 
     void FixedUpdate()

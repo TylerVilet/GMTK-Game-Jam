@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyShoot : MonoBehaviour
@@ -6,6 +7,12 @@ public class EnemyShoot : MonoBehaviour
     public float maxRange = 15f;
     private Vector3 spawnPosition;
     private Collider2D myCollider;
+
+    // Reflected bullets need to hit enemies, so we keep track of the
+    // enemy colliders we ignored at spawn (to stop this bullet hitting its
+    // own shooter) in order to re-enable collision with them on Reflect().
+    private readonly List<Collider2D> ignoredEnemyColliders = new List<Collider2D>();
+    private bool reflected;
 
     private void Start()
     {
@@ -18,7 +25,10 @@ public class EnemyShoot : MonoBehaviour
         {
             Collider2D enemyCollider = enemy.GetComponent<Collider2D>();
             if (enemyCollider != null)
+            {
                 Physics2D.IgnoreCollision(myCollider, enemyCollider);
+                ignoredEnemyColliders.Add(enemyCollider);
+            }
         }
         GameObject[] bullets = GameObject.FindGameObjectsWithTag("EnemyBullet");
         foreach (var otherBullet in bullets)
@@ -28,6 +38,29 @@ public class EnemyShoot : MonoBehaviour
             if (bulletCollider != null)
                 Physics2D.IgnoreCollision(myCollider, bulletCollider);
         }
+    }
+
+    // Called by SwordWeapon when the player parries this bullet - sends it
+    // back out toward enemies instead of the player, dealing the sword's own
+    // reflect damage rather than whatever the original bullet would have dealt.
+    public void Reflect(Vector2 direction, float speed, float reflectDamage)
+    {
+        reflected = true;
+        damage = reflectDamage;
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.linearVelocity = direction.normalized * speed;
+
+        transform.up = direction; // face the new travel direction
+
+        // Re-enable collision with enemies now that this bullet is meant to hurt them
+        foreach (Collider2D enemyCollider in ignoredEnemyColliders)
+        {
+            if (enemyCollider != null)
+                Physics2D.IgnoreCollision(myCollider, enemyCollider, false);
+        }
+
+        spawnPosition = transform.position; // reset range so the reflect doesn't cut its flight short
     }
 
     private void Update()
@@ -52,6 +85,24 @@ public class EnemyShoot : MonoBehaviour
 
     private void HandleHit(GameObject hitObject)
     {
+        if (reflected)
+        {
+            if (hitObject.CompareTag("Enemy"))
+            {
+                Enemy enemy = hitObject.GetComponent<Enemy>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(damage);
+                }
+                Destroy(gameObject);
+            }
+            else if (hitObject.name.StartsWith("Wall") || hitObject.name.StartsWith("Asteroid"))
+            {
+                Destroy(gameObject);
+            }
+            return; // a reflected bullet can no longer hurt the player
+        }
+
         if (hitObject.CompareTag("Player"))
         {
             Debug.Log("Hit Player");

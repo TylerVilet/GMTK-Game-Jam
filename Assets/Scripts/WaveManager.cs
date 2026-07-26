@@ -32,6 +32,7 @@ public class WaveManager : MonoBehaviour
     public string enemyTag = "Enemy";
     public float spawnInterval = 5f;
     public float stopwatch;
+    public float waveClearedPopupDelay = 1.5f; // pause between the wave clearing and the power-up popup appearing
 
     [Header("UI Scene (loaded additively alongside this one)")]
     public string uiSceneName = "MainMenu";
@@ -114,6 +115,9 @@ public class WaveManager : MonoBehaviour
             int timeBonus = Mathf.RoundToInt(Mathf.Max(0f, Countdown));
             if (ScoreManager.Instance != null)
                 ScoreManager.Instance.AddScore(timeBonus * (1 + CurrentWaveIndex));
+
+            yield return new WaitForSeconds(waveClearedPopupDelay);
+            if (IsGameOver) yield break;
 
             IsWaitingForNextWave = true;
             OnWaveCleared?.Invoke();
