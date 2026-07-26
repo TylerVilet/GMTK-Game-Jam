@@ -239,6 +239,10 @@ public class WaveManager : MonoBehaviour
     {
         if (IsGameOver) return;
 
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.SaveHighScoreIfBeaten(); // NEW
+
+
         IsGameOver = true;
         waveActive = false;
         IsWaitingForNextWave = false;

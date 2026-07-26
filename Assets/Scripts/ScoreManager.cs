@@ -54,4 +54,14 @@ public class ScoreManager : MonoBehaviour
         PlayerPrefs.SetInt(HighscoreKey, highscore);
         PlayerPrefs.Save(); // force an immediate disk write rather than waiting for Unity's internal flush
     }
+
+    public void SaveHighScoreIfBeaten()
+    {
+        int highScore = PlayerPrefs.GetInt("HighScore", 0);
+        if (score > highScore)
+        {
+            PlayerPrefs.SetInt("HighScore", score);
+            PlayerPrefs.Save();
+        }
+    }
 }
