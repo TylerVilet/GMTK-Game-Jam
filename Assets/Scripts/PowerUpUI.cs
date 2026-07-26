@@ -110,12 +110,16 @@ public class PowerUpUI : MonoBehaviour
         Player player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
 
         bool isFullHealth = player != null && player.health >= player.maxHealth;
+        bool usingSword = FindFirstObjectByType<Gun>() == null && FindFirstObjectByType<SwordWeapon>() != null;
 
-        // Build a pool that excludes FullHealth if the player doesn't need it
+        // Build a pool that excludes FullHealth if the player doesn't need it,
+        // and BulletRange if they're using the sword (no bullets to extend the range of)
         System.Collections.Generic.List<PowerUpOption> availablePool = new System.Collections.Generic.List<PowerUpOption>();
         foreach (var option in powerUpPool)
         {
             if (option.type == PowerUpType.FullHealth && isFullHealth)
+                continue;
+            if (option.type == PowerUpType.BulletRange && usingSword)
                 continue;
             availablePool.Add(option);
         }

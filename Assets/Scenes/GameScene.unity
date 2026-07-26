@@ -6224,6 +6224,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
   playerSpawnPoint: {fileID: 1208146251}
   healthTextRef: {fileID: 1301187577}
+  healthBarFillRef: {fileID: 54463659}
 --- !u!4 &1208146251
 Transform:
   m_ObjectHideFlags: 0

@@ -8,7 +8,7 @@ using TMPro;
 // rebind buttons, just for a whole name instead of a single key.
 public class PlayerNameEntry : MonoBehaviour
 {
-    const int MaxNameLength = 16;
+    const int MaxNameLength = 10;
 
     public Button nameButton;
     public TMP_Text nameLabel;

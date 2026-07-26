@@ -1,11 +1,13 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using static StartScreenUI;
 
 public class PlayerSpawner : MonoBehaviour
 {
     public Transform playerSpawnPoint;
     public TMP_Text healthTextRef;
+    public Image healthBarFillRef;
 
     public void SpawnPlayer()
     {
@@ -26,6 +28,7 @@ public class PlayerSpawner : MonoBehaviour
         if (playerScript != null)
         {
             playerScript.healthText = healthTextRef;
+            playerScript.healthBarFill = healthBarFillRef;
             playerScript.enabled = true;
         }
 

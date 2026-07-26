@@ -34,6 +34,7 @@ public class LeaderboardManager : MonoBehaviour
 
     const string PlayerNameKey = "PlayerName";
     const string DefaultPlayerName = "Player";
+    const int MaxPlayerNameLength = 10;
 
     public struct LeaderboardEntry
     {
@@ -47,6 +48,8 @@ public class LeaderboardManager : MonoBehaviour
         set
         {
             string sanitized = string.IsNullOrWhiteSpace(value) ? DefaultPlayerName : value.Trim().Replace("|", "");
+            if (sanitized.Length > MaxPlayerNameLength)
+                sanitized = sanitized.Substring(0, MaxPlayerNameLength);
             PlayerPrefs.SetString(PlayerNameKey, sanitized);
             PlayerPrefs.Save();
         }
