@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3743258353691291835}
   - component: {fileID: 3005350251032108058}
   - component: {fileID: 6746203142567501999}
-  - component: {fileID: -1298984966047402943}
+  - component: {fileID: 4763775767947182783}
   m_Layer: 0
   m_Name: BulletEnemy
   m_TagString: EnemyBullet
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.29387, y: -0.30216, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 538101355312058509, guid: 1a4b3612c530bcb41ac7da9e16ae2037, type: 3}
   m_Color: {r: 0.990566, g: 0.2943663, b: 0.2943663, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -136,8 +136,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!58 &-1298984966047402943
-CircleCollider2D:
+--- !u!70 &4763775767947182783
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -171,4 +171,5 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Size: {x: 0.32, y: 0.86}
+  m_Direction: 0

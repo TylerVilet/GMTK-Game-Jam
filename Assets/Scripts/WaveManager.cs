@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using TMPro;
+using static StartScreenUI;
 
 // UnityEvent<T> needs a concrete subclass to show its argument fields in the Inspector.
 [System.Serializable] public class IntEvent : UnityEvent<int> { }
@@ -72,6 +73,7 @@ public class WaveManager : MonoBehaviour
     public void BeginGame()
     {
         if (IsGameOver) return;
+
 
         OnGameBegin?.Invoke();
         StartCoroutine(RunWaves());
@@ -247,5 +249,9 @@ public class WaveManager : MonoBehaviour
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
             Destroy(playerObject);
+
+        GameObject gun = GameObject.FindGameObjectWithTag("Weapon");
+        if (gun != null)
+            Destroy(gun);
     }
 }
