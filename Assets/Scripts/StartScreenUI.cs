@@ -31,7 +31,7 @@ public class StartScreenUI : MonoBehaviour
     public SelectableOption[] weaponOptions;
 
     [Header("Overall")]
-    public GameObject startScreenRoot; // hidden entirely once Start is pressed
+    public GameObject startScreenRoot; // hidden entirely once Start is pressed - Settings is Main-Menu-only
 
     int selectedCharacterIndex = -1;
     int selectedWeaponIndex = -1;

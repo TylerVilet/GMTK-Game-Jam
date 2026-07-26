@@ -24,6 +24,9 @@ public class MusicManager : MonoBehaviour
     {
         if (musicSource == null) return;
 
+        if (SettingsManager.Instance != null)
+            volume = SettingsManager.Instance.MusicVolume;
+
         musicSource.clip = gameplayTrack;
         musicSource.loop = true;
         musicSource.volume = volume;
