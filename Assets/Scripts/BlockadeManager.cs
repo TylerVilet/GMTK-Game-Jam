@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public class BlockadeManager : MonoBehaviour
 {
     const int MaxAsteroids = 30;
-    static readonly float[] AsteroidSizes = { 1f, 1.5f, 2.2f }; // small / medium / large - picked per asteroid
+    static readonly float[] AsteroidSizes = { 1f, 1.5f }; // small / medium - picked per asteroid
     const float CornerMargin = 6f;       // keep clear of the four corners
     const float EnemyFootprint = 1f;     // matches Enemy.prefab's collider size
     const float EdgeClearance = EnemyFootprint * 3f; // guaranteed gap between two asteroids' edges, regardless of their sizes

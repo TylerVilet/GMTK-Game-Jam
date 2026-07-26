@@ -9,10 +9,10 @@ public class CharacterVisual : MonoBehaviour
     public Sprite leftSprite;
     public Sprite rightSprite;
 
-    public float idleBobHeight = 0.06f;
-    public float idleBobSpeed = 2f;
-    public float walkBobHeight = 0.05f;
-    public float walkBobSpeed = 10f;
+    public float idleBobHeight = 0.15f;
+    public float idleBobSpeed = 2.5f;
+    public float walkBobHeight = 0.2f;
+    public float walkBobSpeed = 7f;
     public float speedThreshold = 0.1f;
 
     SpriteRenderer sr;

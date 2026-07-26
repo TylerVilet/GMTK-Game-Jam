@@ -199,10 +199,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterVisual
   leftSprite: {fileID: 318268888320200, guid: 3e215e442afa284429b3a72e8aef5a1c, type: 3}
   rightSprite: {fileID: 8932870640403358205, guid: 9a4c9984b74be7b41a6363bf5f8754ef, type: 3}
-  idleBobHeight: 0.06
-  idleBobSpeed: 2
-  walkBobHeight: 0.05
-  walkBobSpeed: 10
+  idleBobHeight: 0.15
+  idleBobSpeed: 2.5
+  walkBobHeight: 0.2
+  walkBobSpeed: 7
   speedThreshold: 0.1
 --- !u!1 &3414000218827975972
 GameObject:

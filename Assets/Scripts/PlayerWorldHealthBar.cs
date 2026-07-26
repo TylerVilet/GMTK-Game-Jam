@@ -75,9 +75,15 @@ public class PlayerWorldHealthBar : MonoBehaviour
 
     void BuildBar()
     {
+        // Parented to SpriteVisual (the child CharacterVisual actually bobs
+        // up and down) rather than the player's root, so the bar rides along
+        // with that same motion for free instead of staying static overhead.
+        Transform bobbingVisual = player.transform.Find("SpriteVisual");
+        Transform anchorParent = bobbingVisual != null ? bobbingVisual : player.transform;
+
         Vector3 playerScale = player.transform.localScale;
         GameObject anchor = new GameObject("HealthBarAnchor");
-        anchor.transform.SetParent(player.transform, false);
+        anchor.transform.SetParent(anchorParent, false);
         anchor.transform.localPosition = offset;
         anchor.transform.localScale = new Vector3(
             playerScale.x != 0f ? 1f / playerScale.x : 1f,

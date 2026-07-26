@@ -848,7 +848,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -858,7 +858,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Astronaut
+  m_text: Flash
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}
   m_sharedMaterial: {fileID: 8409694658167202791, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}
@@ -3303,24 +3303,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1843971731}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[0].label
+      value: Core
+      objectReference: {fileID: 0}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[1].label
-      value: Astronaut
+      value: Flash
       objectReference: {fileID: 0}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[2].label
-      value: Astronaut
+      value: Titan
       objectReference: {fileID: 0}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[0].button
-      value: 
+      value:
       objectReference: {fileID: 337261124}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[1].button
-      value: 
+      value:
       objectReference: {fileID: 643836366}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[2].button
-      value: 
+      value:
       objectReference: {fileID: 1193162924}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: weaponOptions.Array.data[0].weaponPrefab
@@ -3332,20 +3336,44 @@ PrefabInstance:
       objectReference: {fileID: 8963655028653234250, guid: c769d61a3bf8a6d43a7eea367c5857f2, type: 3}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: weaponOptions.Array.data[2].weaponPrefab
-      value: 
-      objectReference: {fileID: 8963655028653234250, guid: c769d61a3bf8a6d43a7eea367c5857f2, type: 3}
+      value:
+      objectReference: {fileID: 100001, guid: c07501a33d18d2f4abed91b1f805234f, type: 3}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[0].weaponPrefab
-      value: 
+      value:
       objectReference: {fileID: 108064979600626669, guid: 9f62ef74f5a1f5e4f8f526c0fed38cb6, type: 3}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[1].weaponPrefab
-      value: 
+      value:
       objectReference: {fileID: 108064979600626669, guid: 9f62ef74f5a1f5e4f8f526c0fed38cb6, type: 3}
     - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: characterOptions.Array.data[2].weaponPrefab
-      value: 
+      value:
       objectReference: {fileID: 108064979600626669, guid: 9f62ef74f5a1f5e4f8f526c0fed38cb6, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[0].leftSprite
+      value:
+      objectReference: {fileID: 318268888320200, guid: 3e215e442afa284429b3a72e8aef5a1c, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[0].rightSprite
+      value:
+      objectReference: {fileID: 8932870640403358205, guid: 9a4c9984b74be7b41a6363bf5f8754ef, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[1].leftSprite
+      value:
+      objectReference: {fileID: 3635291192076193762, guid: a1a1c9d27fc642546967f500913cb899, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[1].rightSprite
+      value:
+      objectReference: {fileID: -4901388376356712542, guid: 4834c7078dec32046a953cd58a1cb1cd, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[2].leftSprite
+      value:
+      objectReference: {fileID: -8701559214312409166, guid: 5fb37e7b953d0504a82e92264ab6784c, type: 3}
+    - target: {fileID: 901626973590280224, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
+      propertyPath: characterOptions.Array.data[2].rightSprite
+      value:
+      objectReference: {fileID: -3460701744269186564, guid: 82d52d1307e28f1438ba0a56e1b7dc5c, type: 3}
     - target: {fileID: 3240744103994712258, guid: aff5f4f71db451d4abb817090f82ccff, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3865,7 +3893,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -3875,7 +3903,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 318268888320200, guid: 3e215e442afa284429b3a72e8aef5a1c, type: 3}
+  m_Sprite: {fileID: -4901388376356712542, guid: 4834c7078dec32046a953cd58a1cb1cd, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -4617,7 +4645,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3753825769889500098, guid: 678658563eb40c94294e846482d7b4fe, type: 3}
+  m_Sprite: {fileID: 7599561973494478690, guid: 5540c8a4dcb0c5b47b27e1dc317096a2, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -5925,7 +5953,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5935,7 +5963,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 318268888320200, guid: 3e215e442afa284429b3a72e8aef5a1c, type: 3}
+  m_Sprite: {fileID: -3460701744269186564, guid: 82d52d1307e28f1438ba0a56e1b7dc5c, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -6882,7 +6910,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -6892,7 +6920,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Astronaut
+  m_text: Titan
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}
   m_sharedMaterial: {fileID: 8409694658167202791, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}
@@ -7409,7 +7437,7 @@ GameObject:
   - component: {fileID: 8100000005}
   - component: {fileID: 8100000006}
   m_Layer: 5
-  m_Name: CharacterPreview
+  m_Name: TitanPreview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7444,7 +7472,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -7526,7 +7554,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a22681cb757092418f048875d768572, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::IdleBob
   bobHeight: 8
   bobSpeed: 2
@@ -7886,7 +7914,7 @@ GameObject:
   - component: {fileID: 2776407513917182243}
   - component: {fileID: 4959082165546897548}
   m_Layer: 5
-  m_Name: Astronaut Button
+  m_Name: Core Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7953,7 +7981,7 @@ GameObject:
   - component: {fileID: 4522856842208729369}
   - component: {fileID: 7876784305112012075}
   m_Layer: 5
-  m_Name: Astronaut
+  m_Name: Core
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8355,7 +8383,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Astronaut
+  m_text: Core
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}
   m_sharedMaterial: {fileID: 8409694658167202791, guid: 7f44fe470cbf3ee4286522dcd58a77d7, type: 2}

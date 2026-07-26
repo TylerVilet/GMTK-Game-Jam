@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 678658563eb40c94294e846482d7b4fe
+guid: 82d52d1307e28f1438ba0a56e1b7dc5c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3753825769889500098
-    second: sword_0
+      213: -3460701744269186564
+    second: Ch2_0
+  - first:
+      213: -8221005231498174227
+    second: Ch2_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 2329
+  spritePixelsToUnits: 331
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,23 +116,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sword_0
+      name: Ch2_0
       rect:
         serializedVersion: 2
-        x: 511
-        y: 81
-        width: 656
-        height: 2329
+        x: 146
+        y: 71
+        width: 331
+        height: 505
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e347705d95bb7ebc0800000000000000
-      internalID: -3753825769889500098
+      spriteID: cf9a243691e19ffc0800000000000000
+      internalID: -3460701744269186564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ch2_1
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 192
+        width: 11
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de06ce77c4f19ed80800000000000000
+      internalID: -8221005231498174227
       vertices: []
       indices: 
       edges: []
@@ -138,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: cfa16d15fa577a84fad356b9510ceb0d
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +173,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      sword_0: -3753825769889500098
+      Ch2_0: -3460701744269186564
+      Ch2_1: -8221005231498174227
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

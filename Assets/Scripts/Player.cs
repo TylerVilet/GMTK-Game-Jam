@@ -43,6 +43,18 @@ public class Player : MonoBehaviour
         RefreshHealthUI();
 
         EquipSelectedWeapon();
+        ApplySelectedCharacterVisual();
+    }
+
+    void ApplySelectedCharacterVisual()
+    {
+        CharacterVisual visual = GetComponentInChildren<CharacterVisual>();
+        if (visual == null) return;
+
+        if (GameSelection.SelectedCharacterLeftSprite != null)
+            visual.leftSprite = GameSelection.SelectedCharacterLeftSprite;
+        if (GameSelection.SelectedCharacterRightSprite != null)
+            visual.rightSprite = GameSelection.SelectedCharacterRightSprite;
     }
 
     void EquipSelectedWeapon()

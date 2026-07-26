@@ -10,7 +10,9 @@ public class StartScreenUI : MonoBehaviour
     {
         public string label;
         public Button button;
-        public GameObject weaponPrefab;
+        public GameObject weaponPrefab; // NEW - drag AK prefab / Uzi prefab here
+        public Sprite leftSprite; // character options only - facing left
+        public Sprite rightSprite; // character options only - facing right
     }
 
     [Header("Main Page")]
@@ -40,6 +42,8 @@ public class StartScreenUI : MonoBehaviour
     {
         public static GameObject SelectedCharacterPrefab;
         public static GameObject SelectedWeaponPrefab;
+        public static Sprite SelectedCharacterLeftSprite;
+        public static Sprite SelectedCharacterRightSprite;
     }
 
     void Start()
@@ -75,7 +79,9 @@ public class StartScreenUI : MonoBehaviour
     {
         selectedCharacterIndex = index;
         characterButtonLabel.text = characterOptions[index].label;
-        GameSelection.SelectedCharacterPrefab = characterOptions[index].weaponPrefab;
+        GameSelection.SelectedCharacterPrefab = characterOptions[index].weaponPrefab; // the field name is misleading here � it's actually the character prefab
+        GameSelection.SelectedCharacterLeftSprite = characterOptions[index].leftSprite;
+        GameSelection.SelectedCharacterRightSprite = characterOptions[index].rightSprite;
         ShowMainPage();
         RefreshStartButton();
     }

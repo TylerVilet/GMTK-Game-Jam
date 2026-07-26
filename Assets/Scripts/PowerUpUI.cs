@@ -201,6 +201,7 @@ public class PowerUpUI : MonoBehaviour
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         Player player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
         Gun gun = FindFirstObjectByType<Gun>();
+        SwordWeapon sword = FindFirstObjectByType<SwordWeapon>();
 
         float fraction = rolledValue / 100f; // percent -> multiplier, e.g. 20 -> 0.2f
 
@@ -219,13 +220,18 @@ public class PowerUpUI : MonoBehaviour
                 }
                 break;
             case PowerUpType.FireRate:
+                // "Fire rate" reads oddly for a melee weapon, but it's the same
+                // underlying idea - attack more often - so it makes the sword
+                // swing faster instead of firing faster.
                 if (gun != null) gun.IncreaseFireRate(fraction);
+                if (sword != null) sword.IncreaseFireRate(fraction);
                 break;
             case PowerUpType.Damage:
                 if (gun != null) gun.damageMultiplier *= 1f + fraction;
+                if (sword != null) sword.damageMultiplier *= 1f + fraction;
                 break;
             case PowerUpType.BulletRange:
-                if (gun != null) gun.rangeMultiplier *= 1f + fraction;
+                if (gun != null) gun.rangeMultiplier *= 1f + fraction; // melee has no equivalent - no-op for the sword
                 break;
             case PowerUpType.DashDistance:
                 if (player != null) player.dashDistance *= 1f + fraction;
