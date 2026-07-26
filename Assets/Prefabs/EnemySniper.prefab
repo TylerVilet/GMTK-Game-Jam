@@ -333,7 +333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a568164a27c16204788d7697cac4a2fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  health: 30
+  health: 35
   damage: 15
   damageCooldown: 0.5
   scoreValue: 25
