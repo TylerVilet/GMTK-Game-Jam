@@ -10,8 +10,7 @@ public class StartScreenUI : MonoBehaviour
     {
         public string label;
         public Button button;
-        public GameObject weaponPrefab; // NEW - drag AK prefab / Uzi prefab here
-
+        public GameObject weaponPrefab;
     }
 
     [Header("Main Page")]
@@ -21,6 +20,7 @@ public class StartScreenUI : MonoBehaviour
     public Button weaponButton;
     public TMP_Text weaponButtonLabel;
     public Button startButton;
+    public TMP_Text highScoreText; // NEW - drag a TMP text object in for "High Score: X"
 
     [Header("Character Page (currently just Astronaut)")]
     public GameObject characterPage;
@@ -31,11 +31,10 @@ public class StartScreenUI : MonoBehaviour
     public SelectableOption[] weaponOptions;
 
     [Header("Overall")]
-    public GameObject startScreenRoot; // hidden entirely once Start is pressed
+    public GameObject startScreenRoot;
 
     int selectedCharacterIndex = -1;
     int selectedWeaponIndex = -1;
-
 
     public static class GameSelection
     {
@@ -46,33 +45,37 @@ public class StartScreenUI : MonoBehaviour
     void Start()
     {
         ShowMainPage();
-
         characterButton.onClick.AddListener(() => ShowPage(characterPage));
         weaponButton.onClick.AddListener(() => ShowPage(weaponPage));
-
         SetupOptions(characterOptions, SelectCharacter);
         SetupOptions(weaponOptions, SelectWeapon);
-
         startButton.onClick.AddListener(BeginGame);
         RefreshStartButton();
+        RefreshHighScoreDisplay(); // NEW
+
+    }
+
+    void RefreshHighScoreDisplay() // NEW
+    {
+        if (highScoreText == null) return;
+        int highScore = PlayerPrefs.GetInt("HighScore", 0);
+        highScoreText.text = "High Score: " + highScore;
     }
 
     void SetupOptions(SelectableOption[] options, System.Action<int> onPicked)
     {
         for (int i = 0; i < options.Length; i++)
         {
-            int index = i; // capture for the closure
+            int index = i;
             options[i].button.onClick.AddListener(() => onPicked(index));
         }
     }
-
-
 
     void SelectCharacter(int index)
     {
         selectedCharacterIndex = index;
         characterButtonLabel.text = characterOptions[index].label;
-        GameSelection.SelectedCharacterPrefab = characterOptions[index].weaponPrefab; // the field name is misleading here — it's actually the character prefab
+        GameSelection.SelectedCharacterPrefab = characterOptions[index].weaponPrefab;
         ShowMainPage();
         RefreshStartButton();
     }
@@ -105,11 +108,10 @@ public class StartScreenUI : MonoBehaviour
     {
         startButton.interactable = selectedCharacterIndex >= 0 && selectedWeaponIndex >= 0;
     }
-    
+
     void BeginGame()
     {
         startScreenRoot.SetActive(false);
-
         if (WaveManager.Instance != null)
             WaveManager.Instance.BeginGame();
     }

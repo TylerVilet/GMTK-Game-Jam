@@ -21,24 +21,26 @@ public class PowerUpUI : MonoBehaviour
     public class PowerUpOption
     {
         public string title;
-        [TextArea] public string description;
+        [TextArea] public string descriptionTemplate; // use {0} where the rolled value should appear, e.g. "+{0}% move speed"
         public PowerUpType type;
-        // Fraction (0.2 = +20%) for the multiplicative stats, flat amount for MaxHealth.
-        public float amount;
+        // Possible integer values to randomly roll from each time this shows up.
+        // For percentage-based types, these are percentages (e.g. 15, 20, 25 -> +15%/+20%/+25%).
+        // For MaxHealth, these are flat HP amounts (e.g. 8, 10, 12).
+        public int[] possibleValues;
         public Sprite icon;
     }
 
     public GameObject panel;
     public PowerUpOption[] powerUpPool = new PowerUpOption[]
     {
-        new PowerUpOption { title = "Adrenaline Rush", description = "+20% move speed", type = PowerUpType.MoveSpeed, amount = 0.2f },
-        new PowerUpOption { title = "Reinforced Suit", description = "+10 max HP", type = PowerUpType.MaxHealth, amount = 10f },
-        new PowerUpOption { title = "Rapid Fire", description = "+25% fire rate", type = PowerUpType.FireRate, amount = 0.25f },
-        new PowerUpOption { title = "Heavy Rounds", description = "+30% bullet damage", type = PowerUpType.Damage, amount = 0.3f },
-        new PowerUpOption { title = "Long Barrel", description = "+50% bullet range", type = PowerUpType.BulletRange, amount = 0.5f },
-        new PowerUpOption { title = "Lengthy Dash", description = "+20% distance for dash", type = PowerUpType.DashDistance, amount = 0.2f },
-        new PowerUpOption { title = "Quick Dash", description = "+20% speed for dash", type = PowerUpType.DashSpeed, amount = 0.2f },
-        new PowerUpOption { title = "Heal Wounds", description = "restore player health to max", type = PowerUpType.FullHealth, amount = 1f },
+        new PowerUpOption { title = "Adrenaline Rush", descriptionTemplate = "+{0}% move speed", type = PowerUpType.MoveSpeed, possibleValues = new int[] { 20, 25, 30 } },
+        new PowerUpOption { title = "Reinforced Suit", descriptionTemplate = "+{0} max HP", type = PowerUpType.MaxHealth, possibleValues = new int[] {  10, 15, 20 } },
+        new PowerUpOption { title = "Rapid Fire", descriptionTemplate = "+{0}% fire rate", type = PowerUpType.FireRate, possibleValues = new int[] { 15, 20, 25 } },
+        new PowerUpOption { title = "Heavy Rounds", descriptionTemplate = "+{0}% bullet damage", type = PowerUpType.Damage, possibleValues = new int[] { 15, 20, 25 } },
+        new PowerUpOption { title = "Long Barrel", descriptionTemplate = "+{0}% bullet range", type = PowerUpType.BulletRange, possibleValues = new int[] { 40, 45, 50 } },
+        new PowerUpOption { title = "Lengthy Dash", descriptionTemplate = "+{0}% distance for dash", type = PowerUpType.DashDistance, possibleValues = new int[] { 30, 40, 50 } },
+        new PowerUpOption { title = "Quick Dash", descriptionTemplate = "+{0}% speed for dash", type = PowerUpType.DashSpeed, possibleValues = new int[] { 30, 40, 50 } },
+        new PowerUpOption { title = "Heal Wounds", descriptionTemplate = "restore player health to max", type = PowerUpType.FullHealth, possibleValues = new int[] { 100 } },
     };
     public Button[] choiceButtons;
     public TMP_Text[] choiceTitles;
@@ -46,6 +48,7 @@ public class PowerUpUI : MonoBehaviour
     public Image[] choiceImages;
 
     PowerUpOption[] currentChoices;
+    int[] currentChoiceValues; // the rolled value for each currently-shown choice, parallel to currentChoices
     private WaveManager subscribedWaveManager;
 
     void Awake()
@@ -76,7 +79,6 @@ public class PowerUpUI : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // panel.SetActive(false);
         SubscribeToWaveManager();
     }
 
@@ -89,6 +91,15 @@ public class PowerUpUI : MonoBehaviour
 
         if (subscribedWaveManager != null)
             subscribedWaveManager.OnWaveCleared.AddListener(ShowChoices);
+    }
+
+    // Rolls a random value from the option's possibleValues array.
+    int RollValue(PowerUpOption option)
+    {
+        if (option.possibleValues == null || option.possibleValues.Length == 0)
+            return 0;
+
+        return option.possibleValues[Random.Range(0, option.possibleValues.Length)];
     }
 
     void ShowChoices()
@@ -113,6 +124,7 @@ public class PowerUpUI : MonoBehaviour
 
         int choiceCount = Mathf.Min(choiceButtons.Length, availablePool.Count);
         currentChoices = new PowerUpOption[choiceButtons.Length];
+        currentChoiceValues = new int[choiceButtons.Length];
 
         for (int i = 0; i < choiceCount; i++)
         {
@@ -122,11 +134,20 @@ public class PowerUpUI : MonoBehaviour
 
             currentChoices[i] = option;
 
+            // Roll a random value for this option (e.g. 15/20/25%) fresh each time it's shown
+            int rolledValue = RollValue(option);
+            currentChoiceValues[i] = rolledValue;
+
             if (i < choiceTitles.Length && choiceTitles[i] != null)
                 choiceTitles[i].text = option.title;
 
             if (i < choiceDescriptions.Length && choiceDescriptions[i] != null)
-                choiceDescriptions[i].text = option.description;
+            {
+                string desc = string.IsNullOrEmpty(option.descriptionTemplate)
+                    ? ""
+                    : string.Format(option.descriptionTemplate, rolledValue);
+                choiceDescriptions[i].text = desc;
+            }
 
             if (i < choiceImages.Length && choiceImages[i] != null)
             {
@@ -140,6 +161,7 @@ public class PowerUpUI : MonoBehaviour
         for (int i = choiceCount; i < choiceButtons.Length; i++)
         {
             currentChoices[i] = null;
+            currentChoiceValues[i] = 0;
             if (choiceButtons[i] != null)
             {
                 choiceButtons[i].gameObject.SetActive(false);
@@ -165,7 +187,8 @@ public class PowerUpUI : MonoBehaviour
             return;
 
         PowerUpOption chosen = currentChoices[index];
-        ApplyPowerUp(chosen);
+        int rolledValue = currentChoiceValues[index];
+        ApplyPowerUp(chosen, rolledValue);
 
         panel.SetActive(false);
 
@@ -173,39 +196,42 @@ public class PowerUpUI : MonoBehaviour
             WaveManager.Instance.StartNextWave();
     }
 
-    void ApplyPowerUp(PowerUpOption option)
+    void ApplyPowerUp(PowerUpOption option, int rolledValue)
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         Player player = playerObject != null ? playerObject.GetComponent<Player>() : FindFirstObjectByType<Player>();
         Gun gun = FindFirstObjectByType<Gun>();
 
+        float fraction = rolledValue / 100f; // percent -> multiplier, e.g. 20 -> 0.2f
+
         switch (option.type)
         {
             case PowerUpType.MoveSpeed:
-                if (player != null) player.speed *= 1f + option.amount;
+                if (player != null) player.speed *= 1f + fraction;
                 break;
             case PowerUpType.MaxHealth:
                 if (player != null)
                 {
-                    player.maxHealth += option.amount;
-                    player.health += option.amount;
+                    // MaxHealth uses the rolled value as a flat amount, not a percentage
+                    player.maxHealth += rolledValue;
+                    player.health += rolledValue;
                     player.updateHealthUI();
                 }
                 break;
             case PowerUpType.FireRate:
-                if (gun != null) gun.IncreaseFireRate(option.amount);
+                if (gun != null) gun.IncreaseFireRate(fraction);
                 break;
             case PowerUpType.Damage:
-                if (gun != null) gun.damageMultiplier *= 1f + option.amount;
+                if (gun != null) gun.damageMultiplier *= 1f + fraction;
                 break;
             case PowerUpType.BulletRange:
-                if (gun != null) gun.rangeMultiplier *= 1f + option.amount;
+                if (gun != null) gun.rangeMultiplier *= 1f + fraction;
                 break;
             case PowerUpType.DashDistance:
-                if (player != null) player.dashDistance *= 1f + option.amount;
+                if (player != null) player.dashDistance *= 1f + fraction;
                 break;
             case PowerUpType.DashSpeed:
-                if (player != null) player.dashSpeed *= 1f + option.amount;
+                if (player != null) player.dashSpeed *= 1f + fraction;
                 break;
             case PowerUpType.FullHealth:
                 if (player != null)
@@ -216,6 +242,6 @@ public class PowerUpUI : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"[PowerUpUI] Applied: {option.title}");
+        Debug.Log($"[PowerUpUI] Applied: {option.title} ({rolledValue})");
     }
 }
