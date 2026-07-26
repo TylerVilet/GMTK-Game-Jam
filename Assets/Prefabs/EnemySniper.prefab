@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   health: 30
-  damage: 10
+  damage: 15
   damageCooldown: 0.5
   scoreValue: 25
 --- !u!114 &4092483465261749472

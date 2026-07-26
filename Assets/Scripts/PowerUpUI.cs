@@ -35,8 +35,8 @@ public class PowerUpUI : MonoBehaviour
     {
         new PowerUpOption { title = "Adrenaline Rush", descriptionTemplate = "+{0}% move speed", type = PowerUpType.MoveSpeed, possibleValues = new int[] { 20, 25, 30 } },
         new PowerUpOption { title = "Reinforced Suit", descriptionTemplate = "+{0} max HP", type = PowerUpType.MaxHealth, possibleValues = new int[] {  10, 15, 20 } },
-        new PowerUpOption { title = "Rapid Fire", descriptionTemplate = "+{0}% fire rate", type = PowerUpType.FireRate, possibleValues = new int[] { 15, 20, 25 } },
-        new PowerUpOption { title = "Heavy Rounds", descriptionTemplate = "+{0}% bullet damage", type = PowerUpType.Damage, possibleValues = new int[] { 15, 20, 25 } },
+        new PowerUpOption { title = "Rapid Fire", descriptionTemplate = "+{0}% attack rate", type = PowerUpType.FireRate, possibleValues = new int[] { 15, 20, 25 } },
+        new PowerUpOption { title = "Heavy Rounds", descriptionTemplate = "+{0}% attack damage", type = PowerUpType.Damage, possibleValues = new int[] { 15, 20, 25 } },
         new PowerUpOption { title = "Long Barrel", descriptionTemplate = "+{0}% bullet range", type = PowerUpType.BulletRange, possibleValues = new int[] { 40, 45, 50 } },
         new PowerUpOption { title = "Lengthy Dash", descriptionTemplate = "+{0}% distance for dash", type = PowerUpType.DashDistance, possibleValues = new int[] { 30, 40, 50 } },
         new PowerUpOption { title = "Quick Dash", descriptionTemplate = "+{0}% speed for dash", type = PowerUpType.DashSpeed, possibleValues = new int[] { 30, 40, 50 } },

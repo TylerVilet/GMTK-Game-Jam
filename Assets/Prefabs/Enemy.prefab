@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   health: 50
-  damage: 10
+  damage: 7
   damageCooldown: 0.5
   scoreValue: 10
 --- !u!114 &5089965107782761792
@@ -127,6 +127,11 @@ MonoBehaviour:
   rb: {fileID: 4489709650373763479}
   speed: 3
   playerTag: Player
+  avoidLookahead: 2.5
+  avoidMargin: 0.5
+  avoidStrength: 1.5
+  separationRadius: 0.9
+  separationStrength: 1
 --- !u!61 &78728373516421657
 BoxCollider2D:
   m_ObjectHideFlags: 0
