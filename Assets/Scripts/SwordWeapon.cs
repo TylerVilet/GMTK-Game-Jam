@@ -23,16 +23,27 @@ public class SwordWeapon : MonoBehaviour
     [SerializeField] private float stabReturnDuration = 0.05f; // ease back to resting distance
     [SerializeField] private float stabCooldown = 0.15f;
 
+    [Header("Reflect")]
+    [SerializeField] private float reflectWidth = 3f;     // how far the blocking swing reaches, perpendicular to aim - the "width" of the reflection
+    [SerializeField] private float reflectThickness = 0.5f; // how deep the blocking zone is along the aim axis
+    [SerializeField] private float reflectDuration = 1f;   // how long the perpendicular block stance holds
+    [SerializeField] private float reflectSpeed = 14f;     // speed the parried bullet is sent back out at
+    [SerializeField] private float reflectDamage = 25f;    // damage the parried bullet deals to enemies it hits
+    [SerializeField] private float reflectCooldown = 0.4f;
+
     // Applied on top of the base damage/cooldown above - power-ups multiply
     // these instead of touching the base values directly, same pattern as Gun.
     public float damageMultiplier = 1f;
 
     private Camera mainCamera;
     private float cooldownTimer;
+    private float reflectCooldownTimer;
     private bool isStabbing;
+    private bool isReflecting;
     private bool hitObstacle;
     private Vector2 lastAimDirection = Vector2.right;
     private readonly HashSet<Collider2D> hitThisStab = new HashSet<Collider2D>();
+    private readonly HashSet<EnemyShoot> reflectedThisSwing = new HashSet<EnemyShoot>();
 
     void Start()
     {
@@ -50,17 +61,70 @@ public class SwordWeapon : MonoBehaviour
 
     void Update()
     {
-        if (!isStabbing) AimTowardMouse();
-        // else: position/rotation for the lunge are fully driven by Stab() below.
+        if (!isStabbing && !isReflecting) AimTowardMouse();
+        // else: position/rotation are fully driven by Stab()/ReflectSwing() below.
 
         if (cooldownTimer > 0f) cooldownTimer -= Time.deltaTime;
+        if (reflectCooldownTimer > 0f) reflectCooldownTimer -= Time.deltaTime;
 
         // Held (not just pressed) so a held-down button keeps stabbing as
         // fast as the cooldown allows, same as the gun's fire input.
-        if (!isStabbing && cooldownTimer <= 0f && Mouse.current.leftButton.isPressed)
+        if (!isStabbing && !isReflecting && cooldownTimer <= 0f && Mouse.current.leftButton.isPressed)
         {
             StartCoroutine(Stab());
         }
+
+        // Reflect is a discrete parry (rebindable in Settings, right-click by
+        // default) - one press turns the blade perpendicular to hold a block
+        // stance for the full swing duration.
+        SettingsManager.InputBinding reflectBinding = SettingsManager.Instance != null
+            ? SettingsManager.Instance.ReflectBinding
+            : SettingsManager.InputBinding.FromMouseButton(1);
+        if (!isStabbing && !isReflecting && reflectCooldownTimer <= 0f && reflectBinding.WasPressedThisFrame())
+        {
+            StartCoroutine(ReflectSwing());
+        }
+    }
+
+    // Turns the blade perpendicular to the current aim direction and holds it
+    // there as a wide block for reflectDuration. Checked fresh every frame
+    // (not just once) so it catches bullets from enemies that spawn mid-swing
+    // too, not just whatever already existed when the swing started.
+    IEnumerator ReflectSwing()
+    {
+        isReflecting = true;
+        reflectCooldownTimer = reflectCooldown;
+        reflectedThisSwing.Clear();
+
+        Vector2 direction = lastAimDirection;
+        Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+        float angle = Mathf.Atan2(perpendicular.y, perpendicular.x) * Mathf.Rad2Deg;
+        Vector2 boxSize = new Vector2(reflectWidth, reflectThickness);
+
+        float elapsed = 0f;
+        while (elapsed < reflectDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            Vector2 center = (Vector2)player.position + direction * orbitRadius;
+            transform.position = center;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+
+            Collider2D[] hits = Physics2D.OverlapBoxAll(center, boxSize, angle);
+            foreach (Collider2D hit in hits)
+            {
+                EnemyShoot enemyBullet = hit.GetComponent<EnemyShoot>();
+                if (enemyBullet != null && !reflectedThisSwing.Contains(enemyBullet))
+                {
+                    enemyBullet.Reflect(direction, reflectSpeed, reflectDamage);
+                    reflectedThisSwing.Add(enemyBullet);
+                }
+            }
+
+            yield return null;
+        }
+
+        isReflecting = false;
     }
 
     void AimTowardMouse()

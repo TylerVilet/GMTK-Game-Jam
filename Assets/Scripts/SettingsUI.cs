@@ -16,16 +16,22 @@ public class SettingsUI : MonoBehaviour
     public TMP_Text sfxValueLabel;
     public Button rebindDashButton;
     public TMP_Text dashKeyLabel;
+    public Button rebindReflectButton;
+    public TMP_Text reflectKeyLabel;
 
     [Header("Whichever of these are showing get hidden while Settings is open, then restored on close")]
     public GameObject[] pagesToHideWhileOpen;
 
+    enum RebindTarget { None, Dash, Reflect }
+
     readonly List<GameObject> pagesWeHid = new List<GameObject>();
-    bool listeningForKey = false;
+    RebindTarget listeningFor = RebindTarget.None;
+    int listenStartFrame = -1; // rebinding starts via a left-click, so we skip scanning until the next frame - otherwise that same click immediately self-binds to "Left Click"
 
     void Start()
     {
         panel.SetActive(false);
+        Time.timeScale = 1f; // in case a scene loaded while a previous SettingsUI had paused it - timeScale isn't reset by a scene load on its own
 
         openButton.onClick.AddListener(OpenPanel);
         if (closeButton != null)
@@ -39,10 +45,13 @@ public class SettingsUI : MonoBehaviour
         UpdateValueLabel(musicValueLabel, musicSlider.value);
         UpdateValueLabel(sfxValueLabel, sfxSlider.value);
         UpdateDashKeyLabel();
+        UpdateReflectKeyLabel();
 
         musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
         sfxSlider.onValueChanged.AddListener(OnSfxSliderChanged);
-        rebindDashButton.onClick.AddListener(BeginRebind);
+        rebindDashButton.onClick.AddListener(() => BeginRebind(RebindTarget.Dash));
+        if (rebindReflectButton != null)
+            rebindReflectButton.onClick.AddListener(() => BeginRebind(RebindTarget.Reflect));
     }
 
     void OpenPanel()
@@ -61,11 +70,13 @@ public class SettingsUI : MonoBehaviour
         }
 
         panel.SetActive(true);
+        Time.timeScale = 0f; // pause gameplay while settings is open - input/UI still work since those aren't time-scaled
     }
 
     void ClosePanel()
     {
         panel.SetActive(false);
+        Time.timeScale = 1f;
 
         foreach (var page in pagesWeHid)
         {
@@ -96,16 +107,19 @@ public class SettingsUI : MonoBehaviour
             label.text = Mathf.RoundToInt(sliderValue * 100f) + "%";
     }
 
-    void BeginRebind()
+    void BeginRebind(RebindTarget target)
     {
-        listeningForKey = true;
-        if (dashKeyLabel != null)
-            dashKeyLabel.text = "Press any key...";
+        listeningFor = target;
+        listenStartFrame = Time.frameCount;
+
+        TMP_Text label = target == RebindTarget.Dash ? dashKeyLabel : reflectKeyLabel;
+        if (label != null)
+            label.text = "Press any key...";
     }
 
     void Update()
     {
-        if (!listeningForKey && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (listeningFor == RebindTarget.None && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (panel.activeSelf)
                 ClosePanel();
@@ -113,27 +127,60 @@ public class SettingsUI : MonoBehaviour
                 OpenPanel();
         }
 
-        if (!listeningForKey || Keyboard.current == null) return;
+        if (listeningFor == RebindTarget.None) return;
+        if (Time.frameCount == listenStartFrame) return; // don't let the click that opened rebinding also complete it
 
-        foreach (KeyControl key in Keyboard.current.allKeys)
+        SettingsManager.InputBinding? picked = null;
+
+        if (Mouse.current != null)
         {
-            if (key.wasPressedThisFrame)
-            {
-                if (SettingsManager.Instance != null)
-                    SettingsManager.Instance.SetDashKey(key.keyCode);
+            if (Mouse.current.leftButton.wasPressedThisFrame) picked = SettingsManager.InputBinding.FromMouseButton(0);
+            else if (Mouse.current.rightButton.wasPressedThisFrame) picked = SettingsManager.InputBinding.FromMouseButton(1);
+            else if (Mouse.current.middleButton.wasPressedThisFrame) picked = SettingsManager.InputBinding.FromMouseButton(2);
+        }
 
-                listeningForKey = false;
-                UpdateDashKeyLabel();
-                break;
+        if (picked == null && Keyboard.current != null)
+        {
+            foreach (KeyControl key in Keyboard.current.allKeys)
+            {
+                if (key.wasPressedThisFrame)
+                {
+                    picked = SettingsManager.InputBinding.FromKey(key.keyCode);
+                    break;
+                }
             }
         }
+
+        if (picked == null) return;
+
+        if (SettingsManager.Instance != null)
+        {
+            if (listeningFor == RebindTarget.Dash) SettingsManager.Instance.SetDashBinding(picked.Value);
+            else SettingsManager.Instance.SetReflectBinding(picked.Value);
+        }
+
+        listeningFor = RebindTarget.None;
+        UpdateDashKeyLabel();
+        UpdateReflectKeyLabel();
     }
 
     void UpdateDashKeyLabel()
     {
         if (dashKeyLabel == null) return;
 
-        Key key = SettingsManager.Instance != null ? SettingsManager.Instance.DashKey : Key.LeftShift;
-        dashKeyLabel.text = key.ToString();
+        SettingsManager.InputBinding binding = SettingsManager.Instance != null
+            ? SettingsManager.Instance.DashBinding
+            : SettingsManager.InputBinding.FromKey(Key.LeftShift);
+        dashKeyLabel.text = binding.ToString();
+    }
+
+    void UpdateReflectKeyLabel()
+    {
+        if (reflectKeyLabel == null) return;
+
+        SettingsManager.InputBinding binding = SettingsManager.Instance != null
+            ? SettingsManager.Instance.ReflectBinding
+            : SettingsManager.InputBinding.FromMouseButton(1);
+        reflectKeyLabel.text = binding.ToString();
     }
 }
