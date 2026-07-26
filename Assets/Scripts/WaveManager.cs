@@ -80,7 +80,22 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(RunWaves());
 
         if (!string.IsNullOrEmpty(uiSceneName))
-            SceneManager.UnloadSceneAsync(uiSceneName);
+        {
+            Scene uiScene = SceneManager.GetSceneByName(uiSceneName);
+            if (uiScene.isLoaded)
+            {
+                // UnloadSceneAsync takes several frames to finish, and until it does,
+                // the UI scene's own scripts (e.g. its Settings panel's Escape-key
+                // listener) keep running Update() right alongside GameScene's - so a
+                // stray keypress during that window can get handled twice. Deactivate
+                // every root object immediately/synchronously so nothing there runs
+                // again, then let the async unload reclaim it in the background.
+                foreach (GameObject root in uiScene.GetRootGameObjects())
+                    root.SetActive(false);
+
+                SceneManager.UnloadSceneAsync(uiScene);
+            }
+        }
 
         if (MusicManager.Instance != null)
             MusicManager.Instance.Play();

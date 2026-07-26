@@ -62,7 +62,7 @@ public class StartScreenUI : MonoBehaviour
     void RefreshHighScoreDisplay() // NEW
     {
         if (highScoreText == null) return;
-        int highScore = PlayerPrefs.GetInt("HighScore", 0);
+        int highScore = PlayerPrefs.GetInt("Highscore", 0); // matches ScoreManager.HighscoreKey - this used to read a different-cased key ("HighScore") that ScoreManager never wrote to, so it always showed a stale value
         highScoreText.text = "High Score: " + highScore;
     }
 

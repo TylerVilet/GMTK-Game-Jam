@@ -10,6 +10,13 @@ public class ScoreManager : MonoBehaviour
 
     const string HighscoreKey = "Highscore";
 
+    // Set the moment this run's score first overtakes the previous highscore
+    // (see UpdateScoreText) - lets SaveHighScoreIfBeaten know, once, at game
+    // over, whether THIS run set a new record, without re-deriving it from
+    // score/highscore (which are already equal by then since UpdateScoreText
+    // keeps highscore synced live as score climbs).
+    bool newHighscoreThisRun = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,6 +40,7 @@ public class ScoreManager : MonoBehaviour
     public void ResetScore()
     {
         score = 0;
+        newHighscoreThisRun = false;
         UpdateScoreText();
     }
 
@@ -43,6 +51,7 @@ public class ScoreManager : MonoBehaviour
         if (score > highscore)
         {
             highscore = score;
+            newHighscoreThisRun = true;
             SaveHighscore();
         }
 
@@ -55,13 +64,14 @@ public class ScoreManager : MonoBehaviour
         PlayerPrefs.Save(); // force an immediate disk write rather than waiting for Unity's internal flush
     }
 
+    // Called once from WaveManager.GameOver() - submits this run's score to
+    // the global leaderboard, but only if it's a genuine new personal best,
+    // so a losing/average run never spams the leaderboard.
     public void SaveHighScoreIfBeaten()
     {
-        int highScore = PlayerPrefs.GetInt("HighScore", 0);
-        if (score > highScore)
-        {
-            PlayerPrefs.SetInt("HighScore", score);
-            PlayerPrefs.Save();
-        }
+        if (!newHighscoreThisRun) return;
+
+        if (LeaderboardManager.Instance != null)
+            LeaderboardManager.Instance.SubmitScore(highscore);
     }
 }

@@ -22,6 +22,9 @@ public class SettingsUI : MonoBehaviour
     [Header("Whichever of these are showing get hidden while Settings is open, then restored on close")]
     public GameObject[] pagesToHideWhileOpen;
 
+    [Header("While this is open, Escape closes it instead of opening Settings")]
+    public GameObject leaderboardPanel;
+
     enum RebindTarget { None, Dash, Reflect }
 
     readonly List<GameObject> pagesWeHid = new List<GameObject>();
@@ -56,6 +59,8 @@ public class SettingsUI : MonoBehaviour
 
     void OpenPanel()
     {
+        if (panel.activeSelf) return; // already open - re-scanning here would find everything already hidden and wipe pagesWeHid, losing track of what to restore on close
+
         pagesWeHid.Clear();
         if (pagesToHideWhileOpen != null)
         {
@@ -119,7 +124,8 @@ public class SettingsUI : MonoBehaviour
 
     void Update()
     {
-        if (listeningFor == RebindTarget.None && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        bool leaderboardOpen = leaderboardPanel != null && leaderboardPanel.activeSelf;
+        if (!leaderboardOpen && listeningFor == RebindTarget.None && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (panel.activeSelf)
                 ClosePanel();
