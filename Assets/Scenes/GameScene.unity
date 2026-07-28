@@ -1619,7 +1619,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &589518222
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7279,12 +7279,12 @@ MonoBehaviour:
     possibleValues: 0a0000000f00000014000000
     icon: {fileID: -7199105811427240382, guid: 51cde2b2da4313b42a057ffa6a729c67, type: 3}
   - title: Rapid Fire
-    descriptionTemplate: +{0}% fire rate
+    descriptionTemplate: +{0}% attack rate
     type: 2
     possibleValues: 0f0000001400000019000000
     icon: {fileID: 840519441915055310, guid: cfbb81c41c110804e8abdcf66d5bce0d, type: 3}
   - title: Heavy Rounds
-    descriptionTemplate: +{0}% bullet damage
+    descriptionTemplate: +{0}% attack damage
     type: 3
     possibleValues: 0f0000001400000019000000
     icon: {fileID: 6093718397752939808, guid: 900354de649252a4bbedde9e89317a29, type: 3}
