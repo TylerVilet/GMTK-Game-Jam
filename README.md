@@ -12,7 +12,7 @@ A 2D top-down astronaut-versus-alien wave survival shooter built in Unity for th
 
 # Controls
 
-Move: WASD / Arrow Keys
+Move: W/A/S/D
 
 Shoot: Mouse Button left
 
