@@ -6,7 +6,7 @@ A 2D top-down astronaut-versus-alien wave survival shooter built in Unity for th
 
 tytygamedev.itch.io/the-last-astronaut
 
-![Thumb screenshot](Assets/Images/thumbimage.png)
+![Thumb screenshot](Assets/Images/background_crop_titled.png)
 
 ![Gameplay screenshot](Assets/Images/GameplayGif.gif)
 
