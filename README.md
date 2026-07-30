@@ -24,6 +24,16 @@ Dash: Shift
 
 This project was built for the GMTK Game Jam as a collaborative effort. It puts you in the boots of a stranded astronaut fending off waves of increasingly dangerous aliens, combining fast-paced top-down shooting with run-defining power-up choices and global high score tracking.
 
+Meet the team:
+
+Tyler Vilet: Programmer, Art
+
+Rylan Lottes: Programmer, Art
+
+Reston Lottes: Programmer
+
+Kelsey McGraw: Art
+
 ## Features
 
 Wave-based enemy spawning with escalating difficulty
